@@ -1,0 +1,23 @@
+
+go.property("i", 0)
+
+local basescale = vmath.vector3(0.05)
+local hoverscale = vmath.vector3(0.08)
+
+
+function init(self)
+	self.dragging = false
+	go.set_scale(basescale)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("mouse enter") then
+		go.set_scale(hoverscale)
+	elseif message_id == hash("mouse exit") then
+		go.set_scale(basescale)
+	elseif message_id == hash("drag start") then
+		self.dragging = true
+	elseif message_id == hash("drag end") then
+		self.dragging = false
+	end
+end

@@ -1,0 +1,87 @@
+
+local ui = require "main.interface.interface_module"
+local util = require "main.framework.utilities"
+
+local initial_buttons = { "open btn", "clear btn", "save btn", "quit btn" }
+local active_buttons = {}
+local cur_hover_btn = nil
+
+local btns = {}
+
+
+--########################################  Init  ########################################
+function init(self)
+	self.myurl = msg.url()
+	gui.set_text(gui.get_node("controls text"), "ctrl-click: add point -- left-click drag: move point -- shift: snap to 5 px increments -- mouse wheel: zoom -- middle mouse drag: pan" )
+
+	for i, v in ipairs(initial_buttons) do
+		local button = ui.newbutton(v, gui.get_node(v), self.myurl)
+		btns[v] = button
+		button:set_active(true)
+	end
+
+	btns["open btn"]:set_enabled(false)
+	btns["quit btn"].releasefunc = btn_release_quit
+	btns["save btn"].releasefunc = btn_release_save
+	btns["clear btn"].releasefunc = btn_release_clear
+end
+
+--########################################  On Input  ########################################
+function on_input(self, action_id, action)
+	-- input focus given and taken away by input_manager.script
+	if action_id == nil then
+		for i, v in ipairs(active_buttons) do
+			ui.update_button(btns[v], action.x, action.y)
+		end
+
+	elseif action_id == hash("left click") then
+		if cur_hover_btn then
+			if action.pressed then btns[cur_hover_btn]:press()
+			elseif action.released then btns[cur_hover_btn]:release()
+			end
+			return true -- consume event
+		end
+	end
+end
+
+--########################################  On Message  ########################################
+function on_message(self, message_id, message, sender)
+
+	if message_id == hash("button hovered") then
+		if not cur_hover_btn then
+			msg.post("main#editor", "lost mouse")
+		end
+		cur_hover_btn = message.btn
+
+	elseif message_id == hash("button unhovered") then
+		if cur_hover_btn == message.btn then
+			cur_hover_btn = nil
+			msg.post("main#editor", "gained mouse")
+		end
+
+	elseif message_id == hash("button activated") then
+		table.insert(active_buttons, message.btn)
+
+	elseif message_id == hash("button deactivated") then
+		util.find_remove(active_buttons, message.btn)
+
+	elseif message_id == hash("polygon saved") then
+		gui.set_color(gui.get_node("savetext"), vmath.vector4(1))
+		gui.animate(gui.get_node("savetext"), "color.w", 0, gui.EASING_OUTSINE, 1.5)
+	end
+end
+
+--########################################  Button Release - Quit  ########################################
+function btn_release_quit()
+	msg.post("@system:", "exit", {code = 0})
+end
+
+--########################################  Button Release - Save  ########################################
+function btn_release_save()
+	msg.post("#root", "save polygon")
+end
+
+--########################################  Button Release - Clear  ########################################
+function btn_release_clear()
+	msg.post("#editor", "clear polygon")
+end

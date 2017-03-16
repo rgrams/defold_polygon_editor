@@ -1,0 +1,108 @@
+
+local util = require "main.framework.utilities"
+local input = require "main.framework.input_globals"
+
+local gridsize = 5
+
+local campos = vmath.vector3(0)
+local zoomstep = 100
+local zvect = vmath.vector3(0, 0, zoomstep)
+local panning = false
+
+local mouse_wpos = vmath.vector3(0)
+local mouse_screenpos = vmath.vector3()
+local base_screensize = vmath.vector3()
+local cur_screensize = vmath.vector3()
+local screen_ratio = vmath.vector3(1)
+local scalefactor = 542
+
+
+--########################################  Init  ########################################
+function init(self)
+	msg.post("#editor", "acquire_input_focus")
+	msg.post("#gui", "acquire_input_focus")
+	msg.post(".", "acquire_input_focus")
+
+	window.set_listener(windowevent)
+	campos = go.get_position("camera")
+	base_screensize.x = tonumber(sys.get_config("display.width"))
+	base_screensize.y = tonumber(sys.get_config("display.height"))
+	cur_screensize = vmath.vector3(base_screensize)
+	msg.post("cursor/cursor#script", "window resized", {size = cur_screensize})
+end
+
+--########################################  Window Event  ########################################
+function windowevent(self, event, data)
+	if event == window.WINDOW_EVENT_RESIZED then
+		cur_screensize.x = data.width;  cur_screensize.y = data.height
+		screen_ratio.x = cur_screensize.x / base_screensize.x
+		screen_ratio.y = cur_screensize.y / base_screensize.y
+		msg.post("cursor/cursor#script", "window resized", {size = cur_screensize})
+	end
+end
+
+--########################################  Update Mousepos  ########################################
+function update_mousepos()
+	input.zoom = campos.z / scalefactor
+	mouse_wpos = (mouse_screenpos - base_screensize * 0.5) * (campos.z / scalefactor)
+	mouse_wpos.x = mouse_wpos.x / screen_ratio.y * screen_ratio.x
+	mouse_wpos = mouse_wpos + vmath.vector3(campos.x, campos.y, 0)
+	if input.shift_pressed then
+		mouse_wpos.x = util.round(mouse_wpos.x / gridsize) * gridsize
+		mouse_wpos.y = util.round(mouse_wpos.y / gridsize) * gridsize
+	end
+	msg.post("cursor/cursor#script", "update pos", {pos = mouse_wpos})
+	input.mouse_wpos = mouse_wpos
+end
+
+--########################################  On Input  ########################################
+function on_input(self, action_id, action)
+		-- Mouse Movement
+	if action_id == nil then
+		mouse_screenpos.x = action.x;  mouse_screenpos.y = action.y
+		if panning then
+			campos = campos - vmath.vector3(action.dx, action.dy, 0) * (campos.z / scalefactor)
+			go.set_position(campos, "camera")
+		end
+		update_mousepos()
+
+	elseif action.pressed then
+		if action_id == hash("control") then
+			input.ctrl_pressed = true
+		elseif action_id == hash("alt") then
+			input.alt_pressed = true
+		elseif action_id == hash("shift") then
+			input.shift_pressed = true
+		elseif action_id == hash("s") and input.ctrl_pressed then
+			msg.post("#root", "save polygon")
+		elseif action_id == hash("mouse wheel up") then
+			campos = campos - zvect
+			go.set_position(campos, "camera")
+			update_mousepos()
+		elseif action_id == hash("mouse wheel down") then
+			campos = campos + zvect
+			go.set_position(campos, "camera")
+			update_mousepos()
+		elseif action_id == hash("middle click") then
+			panning = true
+		end
+
+	elseif action.released then
+		if action_id == hash("control") then
+			input.ctrl_pressed = false
+		elseif action_id == hash("alt") then
+			input.alt_pressed = false
+		elseif action_id == hash("shift") then
+			input.shift_pressed = false
+		elseif action_id == hash("middle click") then
+			panning = false
+		end
+	end
+end
+
+--########################################  Final  ########################################
+function final(self)
+	msg.post("#editor", "release_input_focus")
+	msg.post("#gui", "release_input_focus")
+	msg.post(".", "release_input_focus")
+end

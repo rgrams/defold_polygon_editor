@@ -1,20 +1,15 @@
 [project]
-title = My project
-version = 0.1
+title = Defold Polygon Editor
+version = 0.1.1
 
 [bootstrap]
-main_collection = /main/main.collectionc
-
-[input]
-game_binding = /input/game.input_bindingc
+main_collection = /main/root.collectionc
+render = /main/camera/render/my.renderc
 
 [display]
-width = 1280
-height = 720
+width = 1000
+height = 450
 
 [physics]
 scale = 0.02
-
-[script]
-shared_state = 1
 

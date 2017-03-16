@@ -1,0 +1,6 @@
+images {
+  image: "/main/common/Textures/TEX_Square_64.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

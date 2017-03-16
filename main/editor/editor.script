@@ -1,0 +1,191 @@
+
+local util = require "main.framework.utilities"
+local collis = require "main.framework.collision_module"
+local input = require "main.framework.input_globals"
+
+local vertfact = "#vertfact"
+local segfact = "#segfact"
+
+local has_mouse = true
+local hoverobj = nil
+local vert_collis_radius = 15
+local drag = {on = false, obj = nil, i = 0, offset = vmath.vector3()}
+
+local debugcolor = vmath.vector4(1, 1, 0, 1)
+local debugcolor2 = vmath.vector4(0.1, 0.5, 1, 1)
+
+
+--########################################  Init  ########################################
+function init(self)
+	-- input focus given and taken away by input_manager.script
+	self.pts = {}
+	self.verts = {}
+	self.segs = {}
+	self.curi = 0
+end
+
+--########################################  Add Point  ########################################
+function add_point(self, pos, index)
+	local idx = index or self.curi + 1 -- index will be specified if dividing a segment
+	self.curi = self.curi + 1 -- we're gaining a new point regardless so increment the "last" vert index
+	table.insert(self.pts, idx, pos)
+	spawn_vert_obj(self, pos, idx)
+	if idx == 1 then
+		-- no other verts, don't need to spawn any segments
+	elseif idx == 2 and idx == table.maxn(self.pts) then
+		spawn_seg(self, util.previ(self.pts, idx))
+	elseif idx == 3 and idx == table.maxn(self.pts) then
+		-- original third vert, need to spawn closing segment
+		spawn_seg(self, util.previ(self.pts, idx)) -- spawn segment starting at index 2
+		spawn_seg(self, idx) -- at index 3, this is current lastseg
+	elseif idx == table.maxn(self.pts) then
+		-- there are other verts, but this is the last one
+		spawn_seg(self, util.previ(self.pts, idx))
+		-- displacing lastseg, so move it and notify it to update
+		go.set_position(self.pts[table.maxn(self.pts)], self.segs[table.maxn(self.segs)])
+		msg.post(self.segs[table.maxn(self.segs)], "changed")
+	else
+		-- this point is between other points
+		go.set(util.prevval(self.segs, idx), "endpt", pos)
+		msg.post(util.prevval(self.segs, idx), "changed") -- update last segment to end at this point
+		spawn_seg(self, idx) -- spawn new segment starting at this point
+	end
+	update_indices(self)
+end
+
+--########################################  Clear Polygon  ########################################
+function clear_polygon(self)
+	for i, v in ipairs(self.pts) do self.pts[i] = nil end
+	for i, v in ipairs(self.verts) do
+		go.delete(v)
+		self.verts[i] = nil
+	end
+	for i, v in ipairs(self.segs) do
+		go.delete(v)
+		self.segs[i] = nil
+	end
+	self.curi = 0
+	hoverobj = nil
+	drag.on = false
+end
+
+--########################################  Spawn Vert Obj  ########################################
+function spawn_vert_obj(self, pos, index)
+	local vert = factory.create(vertfact, pos, nil, {i = index})
+	table.insert(self.verts, index, vert)
+	return vert
+end
+
+--########################################  Spawn Seg  ########################################
+function spawn_seg(self, startindex)
+	local pos = go.get_position(self.verts[startindex])
+	local endpos = go.get_position(util.nextval(self.verts, startindex))
+	local vect = vmath.vector3(endpos - pos)
+	local props = {
+		i = startindex,
+		endpt = endpos,
+		vect = vect,
+		normvect = vmath.normalize(vect),
+		length = vmath.length(vect)
+	}
+	local seg = factory.create(segfact, pos, util.vect_to_quat(vect), props, 1.0)
+	table.insert(self.segs, startindex, seg)
+end
+
+--########################################  Update Indices  ########################################
+function update_indices(self)
+	for i, v in ipairs(self.verts) do msg.post(v, "set i", {index = i}) end
+	for i, v in ipairs(self.segs) do msg.post(v, "set i", {index = i}) end
+	if table.maxn(self.segs) > 2 then
+		msg.post(self.segs[table.maxn(self.segs)], "last segment")
+	end
+end
+
+--########################################  Moved Vert Update  ########################################
+function moved_vert_update(self, vrt, pos)
+	if drag.i == 1 and table.maxn(self.segs) >= 3 then
+		local prevurl = msg.url(nil, self.segs[table.maxn(self.segs)], "script")
+		go.set(prevurl, "endpt", pos)
+		msg.post(prevurl, "changed")
+	elseif drag.i ~= 1 then
+		local prevurl = msg.url(nil, self.segs[drag.i - 1], "script")
+		go.set(prevurl, "endpt", pos)
+		msg.post(prevurl, "changed")
+	end
+	if self.segs[drag.i] then
+		local nexturl = msg.url(nil, self.segs[drag.i], "script")
+		go.set_position(pos, self.segs[drag.i])
+		msg.post(nexturl, "changed")
+	end
+end
+
+--########################################  Update  ########################################
+function update(self, dt)
+	if has_mouse then
+		if drag.on then
+			go.set_position(input.mouse_wpos + drag.offset, drag.obj)
+			moved_vert_update(self, drag.obj, input.mouse_wpos + drag.offset)
+			-- don't check for other collisions if dragging
+		else
+			-- Cursor world collision check
+			local dist = 1000
+			local lasthoverobj = hoverobj
+			hoverobj = nil
+			for i, v in ipairs(self.verts) do
+				local hitdist = collis.collide_circle_circle(go.get_position(v), vert_collis_radius * input.zoom, input.mouse_wpos, 1)
+				if not hitdist and v == lasthoverobj then
+					msg.post(v, "mouse exit")
+				elseif hitdist and hitdist < dist then
+					msg.post(v, "mouse enter")
+					hoverobj = v
+					dist = hitdist
+				end
+			end
+		end
+	end
+end
+
+--########################################  On Input  ########################################
+function on_input(self, action_id, action)
+	-- left click events consumed by the interface if the mouse is over a button
+	if action.pressed then
+		if action_id == hash("left click") then
+			if hoverobj then
+				msg.post(hoverobj, "drag start")
+				drag.on = true
+				drag.obj = hoverobj
+				drag.i = go.get(msg.url(nil, hoverobj, "script"), "i")
+				drag.offset = vmath.vector3(go.get_position(hoverobj) - input.mouse_wpos)
+			elseif input.ctrl_pressed then
+				add_point(self, input.mouse_wpos)
+			end
+		end
+	elseif action.released then
+		if action_id == hash("left click") then
+			if hoverobj then
+				msg.post(hoverobj, "drag end")
+				drag.on = false
+			end
+		end
+	end
+end
+
+--########################################  On Message  ########################################
+function on_message(self, message_id, message, sender)
+	if message_id == hash("gained mouse") then
+		has_mouse = true
+	elseif message_id == hash("lost mouse") then
+		has_mouse = false
+		if hoverobj then msg.post(hoverobj, "mouse exit") end
+		if drag.on then
+			drag.on = false
+			msg.post(drag.obj, "drag end")
+		end
+	elseif message_id == hash("request poly points") then
+		local pointarray = {}
+		for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
+		msg.post(sender, "poly points", {points = pointarray})
+	elseif message_id == hash("clear polygon") then
+		clear_polygon(self)
+	end
+end

@@ -1,0 +1,9 @@
+
+
+function init(self)
+    msg.post("#camera", "acquire_camera_focus")
+end
+
+function final(self)
+	msg.post(".", "release_camera_focus")
+end

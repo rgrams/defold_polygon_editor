@@ -1,0 +1,10 @@
+
+local origin_linecolor = vmath.vector4(0, 0, 0, 0.5)
+
+
+function init(self)
+	go.set("#origin_x", "scale", vmath.vector3(0.5, 1000, 1))
+	go.set("#origin_y", "scale", vmath.vector3(0.5, 1000, 1))
+	go.set("#origin_x", "tint", origin_linecolor)
+	go.set("#origin_y", "tint", origin_linecolor)
+end

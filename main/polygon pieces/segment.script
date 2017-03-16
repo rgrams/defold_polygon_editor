@@ -1,0 +1,69 @@
+
+local util = require "main.framework.utilities"
+
+go.property("i", 0)
+go.property("endpt", vmath.vector3())
+go.property("vect", vmath.vector3())
+go.property("normvect", vmath.vector3())
+go.property("length", 1)
+go.property("coll_startpos", vmath.vector3())
+go.property("coll_endpos", vmath.vector3())
+
+local spritesize = vmath.vector3(5, 4, 1)
+local coll_length_percent = 0.5
+
+
+function init(self)
+	go.set("#sprite", "tint.w", 0.5)
+	update_everything(self)
+	self.lastseg = false
+end
+
+function update_everything(self)
+	self.vect = self.endpt - go.get_position()
+	self.normvect = vmath.normalize(self.vect)
+	self.length = vmath.length(self.vect)
+	go.set_scale(vmath.vector3(self.length / spritesize.y, 1.5, 1))
+	go.set_rotation(util.vect_to_quat(self.vect))
+
+	update_collision_points(self)
+end
+
+function update_collision_points(self)
+	local coll_length = self.length * coll_length_percent
+	local coll_endoffsetdist = (self.length - coll_length) / 2
+	self.coll_startpos = go.get_position() + self.normvect * coll_endoffsetdist
+	self.coll_endpos = self.coll_startpos + self.normvect * coll_length
+end
+
+function on_message(self, message_id, message, sender)
+
+	if message_id == hash("changed") then
+		update_everything(self)
+
+	elseif message_id == hash("mouse enter") then
+		if not self.lastseg then
+			go.set("#sprite", "tint.w", 1.0)
+			go.set("#sprite", "scale.x", 1.5)
+		end
+
+	elseif message_id == hash("mouse exit") then
+		if not self.lastseg then
+			go.set("#sprite", "tint.w", 0.5)
+			go.set("#sprite", "scale.x", 1.0)
+		end
+
+	elseif message_id == hash("set i") then
+		self.i = message.index
+		if self.lastseg then
+			self.lastseg = false
+			go.set("#sprite", "tint.w", 0.5)
+			go.set("#sprite", "scale.x", 1.0)
+		end
+
+	elseif message_id == hash("last segment") then
+		self.lastseg = true
+		go.set("#sprite", "tint.w", 0.2)
+		go.set("#sprite", "scale.x", 0.8)
+	end
+end

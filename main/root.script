@@ -1,0 +1,25 @@
+
+local fileman = require "main.file_manager"
+
+local bgcolor = vmath.vector4(0.2, 0.2, 0.2, 1)
+
+
+--########################################  Init  ########################################
+function init(self)
+	msg.post("@render:", "clear_color", {color = bgcolor})
+end
+
+--########################################  On Message  ########################################
+function on_message(self, message_id, message, sender)
+
+	if message_id == hash("save polygon") then
+		msg.post("#editor", "request poly points")
+
+		-- This 'save' message stuff gets bounced around way too much atm.
+		-- I'm anticipating more functionality here, but it will still probably change.
+
+	elseif message_id == hash("poly points") then
+		fileman.save_polygon(unpack(message.points))
+		msg.post("#gui", "polygon saved")
+	end
+end
