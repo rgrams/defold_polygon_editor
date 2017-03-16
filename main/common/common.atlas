@@ -17,9 +17,6 @@ images {
   image: "/main/common/Textures/Triangle_64px.png"
 }
 images {
-  image: "/main/common/Textures/TEX_Square_16px.jpg"
-}
-images {
   image: "/main/common/Textures/TEX_Line_5x4px.png"
 }
 margin: 0

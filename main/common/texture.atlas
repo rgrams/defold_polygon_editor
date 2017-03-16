@@ -1,6 +1,0 @@
-images {
-  image: "/main/common/Textures/Roiling-Texture_4.png"
-}
-margin: 0
-extrude_borders: 0
-inner_padding: 0
