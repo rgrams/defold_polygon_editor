@@ -70,7 +70,7 @@ function delete_point(self, index)
 		go.delete(self.segs[index])
 		table.remove(self.segs, index)
 		local prevsegurl = util.scripturl(util.prevval(self.segs, index))
-		go.set(prevsegurl, "endpt", go.get_position(self.verts[index]))
+		go.set(prevsegurl, "endpt", go.get_position(util.nextval(self.verts, util.previ(self.verts, index))))
 		msg.post(prevsegurl, "changed")
 	end
 	update_indices(self)
