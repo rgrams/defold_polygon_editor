@@ -42,6 +42,7 @@ end
 
 --########################################  Next index in array (looping)  ########################################
 function M.nexti(t, i)
+	if #t == 0 then return 0 end
 	i = i + 1
 	if i > #t then i = 1 end
 	return i
@@ -67,6 +68,11 @@ end
 --########################################  Vect to Quat  ########################################
 function M.vect_to_quat(vect)
 	return vmath.quat_rotation_z(math.atan2(vect.y, vect.x))
+end
+
+--########################################  Script URL  ########################################
+function M.scripturl(path)
+	return msg.url(nil, path, "script")
 end
 
 
