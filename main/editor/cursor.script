@@ -1,7 +1,8 @@
 
 local util = require "main.framework.utilities"
+local input = require "main.framework.input_globals"
 
-local line_opacity = 0.15
+local line_opacity = 0.1
 local label_color = vmath.vector4(0.5, 0.5, 0.5, 1)
 local labels = {"labels#x", "labels#x_coord", "labels#y", "labels#y_coord" }
 
@@ -14,6 +15,7 @@ function init(self)
 	go.set("liney#sprite", "scale", vmath.vector3(0.5, 250, 1))
 	go.set("linex#sprite", "scale", vmath.vector3(0.5, 250, 1))
 	for i, v in ipairs(labels) do go.set(v, "color", label_color) end
+	go.set_scale(input.zoom, "labels")
 end
 
 --########################################  On Message  ########################################
@@ -26,5 +28,7 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("window resized") then
 		go.set("liney#sprite", "scale.y", message.size.x * 2)
 		go.set("linex#sprite", "scale.y", message.size.y * 2)
+	elseif message_id == hash("zoom") then
+		go.set_scale(input.zoom, "labels")
 	end
 end
