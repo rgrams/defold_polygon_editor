@@ -18,7 +18,6 @@ local debugcolor2 = vmath.vector4(0.1, 0.5, 1, 1)
 --########################################  Init  ########################################
 function init(self)
 	-- input focus given and taken away by input_manager.script
-	self.pts = {}
 	self.verts = {}
 	self.segs = {}
 	self.curi = 0
@@ -28,21 +27,20 @@ end
 function add_point(self, pos, index)
 	local idx = index or self.curi + 1 -- index will be specified if dividing a segment
 	self.curi = self.curi + 1 -- we're gaining a new point regardless so increment the "last" vert index
-	table.insert(self.pts, idx, pos)
 	spawn_vert_obj(self, pos, idx)
+
 	if idx == 1 then
 		-- no other verts, don't need to spawn any segments
-	elseif idx == 2 and idx == table.maxn(self.pts) then
-		spawn_seg(self, util.previ(self.pts, idx))
-	elseif idx == 3 and idx == table.maxn(self.pts) then
+	elseif idx == 2 and idx == table.maxn(self.verts) then
+		spawn_seg(self, util.previ(self.verts, idx))
+	elseif idx == 3 and idx == table.maxn(self.verts) then
 		-- original third vert, need to spawn closing segment
-		spawn_seg(self, util.previ(self.pts, idx)) -- spawn segment starting at index 2
+		spawn_seg(self, util.previ(self.verts, idx)) -- spawn segment starting at index 2
 		spawn_seg(self, idx) -- at index 3, this is current lastseg
-	elseif idx == table.maxn(self.pts) then
-		-- there are other verts, but this is the last one
-		spawn_seg(self, util.previ(self.pts, idx))
+	elseif idx == table.maxn(self.verts) then
+		spawn_seg(self, util.previ(self.verts, idx))
 		-- displacing lastseg, so move it and notify it to update
-		go.set_position(self.pts[table.maxn(self.pts)], self.segs[table.maxn(self.segs)])
+		go.set_position(pos, self.segs[table.maxn(self.segs)])
 		msg.post(self.segs[table.maxn(self.segs)], "changed")
 	else
 		-- this point is between other points
@@ -55,7 +53,6 @@ end
 
 --########################################  Clear Polygon  ########################################
 function clear_polygon(self)
-	for i, v in ipairs(self.pts) do self.pts[i] = nil end
 	for i, v in ipairs(self.verts) do
 		go.delete(v)
 		self.verts[i] = nil
