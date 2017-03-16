@@ -19,5 +19,7 @@ function on_message(self, message_id, message, sender)
 		self.dragging = true
 	elseif message_id == hash("drag end") then
 		self.dragging = false
+	elseif message_id == hash("set i") then
+		self.i = message.index
 	end
 end

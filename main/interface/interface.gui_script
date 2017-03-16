@@ -12,7 +12,7 @@ local btns = {}
 --########################################  Init  ########################################
 function init(self)
 	self.myurl = msg.url()
-	gui.set_text(gui.get_node("controls text"), "ctrl-click: add point -- left-click drag: move point -- shift: snap to 5 px increments -- mouse wheel: zoom -- middle mouse drag: pan" )
+	gui.set_text(gui.get_node("controls text"), "ctrl-click: add point -- left-click drag: move point -- alt-click: delete point\nshift: snap to 5 px increments -- mouse wheel: zoom -- middle mouse drag: pan" )
 
 	for i, v in ipairs(initial_buttons) do
 		local button = ui.newbutton(v, gui.get_node(v), self.myurl)

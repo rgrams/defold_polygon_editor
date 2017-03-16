@@ -28,16 +28,17 @@ function add_point(self, pos, index)
 	local idx = index or self.curi + 1 -- index will be specified if dividing a segment
 	self.curi = self.curi + 1 -- we're gaining a new point regardless so increment the "last" vert index
 	spawn_vert_obj(self, pos, idx)
+	local vertcount = table.maxn(self.verts)
 
 	if idx == 1 then
 		-- no other verts, don't need to spawn any segments
-	elseif idx == 2 and idx == table.maxn(self.verts) then
+	elseif idx == 2 and idx == vertcount then
 		spawn_seg(self, util.previ(self.verts, idx))
-	elseif idx == 3 and idx == table.maxn(self.verts) then
+	elseif idx == 3 and idx == vertcount then
 		-- original third vert, need to spawn closing segment
 		spawn_seg(self, util.previ(self.verts, idx)) -- spawn segment starting at index 2
 		spawn_seg(self, idx) -- at index 3, this is current lastseg
-	elseif idx == table.maxn(self.verts) then
+	elseif idx == vertcount then
 		spawn_seg(self, util.previ(self.verts, idx))
 		-- displacing lastseg, so move it and notify it to update
 		go.set_position(pos, self.segs[table.maxn(self.segs)])
@@ -47,6 +48,30 @@ function add_point(self, pos, index)
 		go.set(util.prevval(self.segs, idx), "endpt", pos)
 		msg.post(util.prevval(self.segs, idx), "changed") -- update last segment to end at this point
 		spawn_seg(self, idx) -- spawn new segment starting at this point
+	end
+	update_indices(self)
+end
+
+--########################################  Delete Point  ########################################
+function delete_point(self, index)
+	local maxi = table.maxn(self.verts)
+	go.delete(self.verts[index])
+	table.remove(self.verts, index)
+	self.curi = self.curi - 1
+
+	if maxi == 2 then -- only two verts, only one segment
+		go.delete(self.segs[1])
+		table.remove(self.segs, 1)
+	elseif maxi == 3 then -- three verts & segments, must delete two segments
+		go.delete_all({self.segs[index], util.prevval(self.segs, index)})
+		table.remove(self.segs, index)
+		table.remove(self.segs, util.previ(self.segs, index))
+	elseif maxi > 3 then
+		go.delete(self.segs[index])
+		table.remove(self.segs, index)
+		local prevsegurl = util.scripturl(util.prevval(self.segs, index))
+		go.set(prevsegurl, "endpt", go.get_position(self.verts[index]))
+		msg.post(prevsegurl, "changed")
 	end
 	update_indices(self)
 end
@@ -99,29 +124,25 @@ function update_indices(self)
 end
 
 --########################################  Moved Vert Update  ########################################
-function moved_vert_update(self, vrt, pos)
-	if drag.i == 1 and table.maxn(self.segs) >= 3 then
-		local prevurl = msg.url(nil, self.segs[table.maxn(self.segs)], "script")
-		go.set(prevurl, "endpt", pos)
-		msg.post(prevurl, "changed")
-	elseif drag.i ~= 1 then
-		local prevurl = msg.url(nil, self.segs[drag.i - 1], "script")
-		go.set(prevurl, "endpt", pos)
-		msg.post(prevurl, "changed")
+function update_dragged_vert(self, index, pos)
+	if self.segs[index] then
+		go.set_position(pos, self.segs[index])
+		msg.post(self.segs[index], "changed")
 	end
-	if self.segs[drag.i] then
-		local nexturl = msg.url(nil, self.segs[drag.i], "script")
-		go.set_position(pos, self.segs[drag.i])
-		msg.post(nexturl, "changed")
+	local prev_index = util.previ(self.segs, index)
+	if prev_index ~= 0 and index ~= prev_index then
+		local url = util.scripturl(self.segs[prev_index])
+		go.set(url, "endpt", pos)
+		msg.post(self.segs[prev_index], "changed")
 	end
 end
 
 --########################################  Update  ########################################
 function update(self, dt)
 	if has_mouse then
-		if drag.on then
+		if drag.on and drag.obj then
 			go.set_position(input.mouse_wpos + drag.offset, drag.obj)
-			moved_vert_update(self, drag.obj, input.mouse_wpos + drag.offset)
+			update_dragged_vert(self, drag.i, input.mouse_wpos + drag.offset)
 			-- don't check for other collisions if dragging
 		else
 			-- Cursor world collision check
@@ -148,11 +169,15 @@ function on_input(self, action_id, action)
 	if action.pressed then
 		if action_id == hash("left click") then
 			if hoverobj then
-				msg.post(hoverobj, "drag start")
-				drag.on = true
-				drag.obj = hoverobj
-				drag.i = go.get(msg.url(nil, hoverobj, "script"), "i")
-				drag.offset = vmath.vector3(go.get_position(hoverobj) - input.mouse_wpos)
+				if input.alt_pressed then
+					delete_point(self, go.get(util.scripturl(hoverobj), "i"))
+				else
+					msg.post(hoverobj, "drag start")
+					drag.on = true
+					drag.obj = hoverobj
+					drag.i = go.get(util.scripturl(hoverobj), "i")
+					drag.offset = vmath.vector3(go.get_position(hoverobj) - input.mouse_wpos)
+				end
 			elseif input.ctrl_pressed then
 				add_point(self, input.mouse_wpos)
 			end
