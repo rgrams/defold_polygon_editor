@@ -45,7 +45,7 @@ function M.string_add_points(...)
 	print("File Manager - adding points to string")
 	for i, v in ipairs(args) do
 		for i = 1, 3 do
-			string = M.string .. "\ndata: " .. v[xyz[i]]
+			string = string .. "\ndata: " .. v[xyz[i]]
 		end
 	end
 end
@@ -53,11 +53,11 @@ end
 --########################################  Save Polygon  ########################################
 function M.save_polygon(...)
 	print("File Manager - saving file")
-	M.string = basestring
+	string = basestring
 	M.string_add_points(...)
 	local path = filename_base .. tostring(os.time()) .. filename_ext
 	io.output(path)
-	io.write(M.string)
+	io.write(string)
 	io.output():close()
 end
 
