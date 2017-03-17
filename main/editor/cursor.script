@@ -3,7 +3,7 @@ local util = require "main.framework.utilities"
 local input = require "main.framework.input_globals"
 
 local line_opacity = 0.1
-local label_color = vmath.vector4(0.5, 0.5, 0.5, 1)
+local label_color = vmath.vector4(0.4, 0.4, 0.4, 1)
 local labels = {"labels#x", "labels#x_coord", "labels#y", "labels#y_coord" }
 
 

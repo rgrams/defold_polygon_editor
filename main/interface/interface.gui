@@ -3,11 +3,15 @@ fonts {
   name: "system_font"
   font: "/builtins/fonts/system_font.font"
 }
+fonts {
+  name: "opensans_reg"
+  font: "/main/interface/opensans_reg.font"
+}
 background_color {
   x: 0.0
   y: 0.0
   z: 0.0
-  w: 0.0
+  w: 1.0
 }
 nodes {
   position {
@@ -97,7 +101,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "open polygon"
-  font: "system_font"
+  font: "opensans_reg"
   id: "openbtn label"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -117,11 +121,11 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "open btn"
-  layer: "upper"
+  layer: "default"
   inherit_alpha: true
   alpha: 1.0
-  outline_alpha: 1.0
-  shadow_alpha: 1.0
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
   template_node_child: false
   text_leading: 1.0
   text_tracking: 0.0
@@ -214,7 +218,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "clear polygon"
-  font: "system_font"
+  font: "opensans_reg"
   id: "clearbtn label"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -237,8 +241,8 @@ nodes {
   layer: "upper"
   inherit_alpha: true
   alpha: 1.0
-  outline_alpha: 1.0
-  shadow_alpha: 1.0
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
   template_node_child: false
   text_leading: 1.0
   text_tracking: 0.0
@@ -331,7 +335,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "save polygon"
-  font: "system_font"
+  font: "opensans_reg"
   id: "savebtn label"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -351,11 +355,11 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "save btn"
-  layer: "upper"
+  layer: "default"
   inherit_alpha: true
   alpha: 1.0
-  outline_alpha: 1.0
-  shadow_alpha: 1.0
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
   template_node_child: false
   text_leading: 1.0
   text_tracking: 0.0
@@ -448,7 +452,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "quit"
-  font: "system_font"
+  font: "opensans_reg"
   id: "quitbtn label"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -468,11 +472,11 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "quit btn"
-  layer: "upper"
+  layer: "default"
   inherit_alpha: true
   alpha: 1.0
-  outline_alpha: 1.0
-  shadow_alpha: 1.0
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
   template_node_child: false
   text_leading: 1.0
   text_tracking: 0.0
@@ -511,7 +515,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "<text>"
-  font: "system_font"
+  font: "opensans_reg"
   id: "controls text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_TOP
@@ -533,8 +537,8 @@ nodes {
   layer: "default"
   inherit_alpha: true
   alpha: 0.35
-  outline_alpha: 1.0
-  shadow_alpha: 1.0
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
   template_node_child: false
   text_leading: 1.0
   text_tracking: 0.0
@@ -573,7 +577,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "POLYGON SAVED"
-  font: "system_font"
+  font: "opensans_reg"
   id: "savetext"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -595,8 +599,8 @@ nodes {
   layer: ""
   inherit_alpha: true
   alpha: 0.0
-  outline_alpha: 1.0
-  shadow_alpha: 1.0
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
   template_node_child: false
   text_leading: 1.0
   text_tracking: 0.0
@@ -606,6 +610,9 @@ layers {
 }
 layers {
   name: "upper"
+}
+layers {
+  name: "top"
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_LEGACY
