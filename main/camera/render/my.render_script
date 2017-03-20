@@ -13,15 +13,9 @@ function init(self)
 
     self.view = vmath.matrix4()
 	self.projection = vmath.matrix4()
-
-	self.t = 0
-	self.constants = render.constant_buffer()
 end
 
 function update(self)
-	self.t = self.t + 0.016667
-	self.constants.time = vmath.vector4(self.t, 0, 0, 0)
-
     render.set_depth_mask(true)
     render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
 
@@ -36,17 +30,22 @@ function update(self)
     render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
     render.disable_state(render.STATE_CULL_FACE)
 
-    render.set_projection(vmath.matrix4_orthographic(0, render.get_width(), 0, render.get_height(), -1, 1))
     render.set_projection(self.projection)
 
-    render.draw(self.tile_pred, self.constants)
+    render.draw(self.tile_pred)
     render.draw(self.particle_pred)
+
+	render.enable_state(render.STATE_CULL_FACE)
+    render.enable_state(render.STATE_DEPTH_TEST)
+    render.set_depth_mask(true)
     render.draw(self.model_pred)
     render.draw_debug3d()
 
     render.set_view(vmath.matrix4())
     render.set_projection(vmath.matrix4_orthographic(0, render.get_window_width(), 0, render.get_window_height(), -1, 1))
 
+	render.disable_state(render.STATE_CULL_FACE)
+    render.disable_state(render.STATE_DEPTH_TEST)
     render.enable_state(render.STATE_STENCIL_TEST)
     render.draw(self.gui_pred)
     render.draw(self.text_pred)
