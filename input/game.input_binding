@@ -42,6 +42,18 @@ key_trigger {
   input: KEY_S
   action: "s"
 }
+key_trigger {
+  input: KEY_BACKSPACE
+  action: "backspace"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "escape"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "enter"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
   action: "left click"
@@ -61,4 +73,8 @@ mouse_trigger {
 mouse_trigger {
   input: MOUSE_BUTTON_3
   action: "middle click"
+}
+text_trigger {
+  input: TEXT
+  action: "text"
 }

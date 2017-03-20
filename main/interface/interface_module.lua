@@ -5,6 +5,8 @@ local presscolor = vmath.vector4(0.8, 0.8, 0.8, 1)
 local normalcolor = vmath.vector4(0.3, 0.3, 0.3, 1)
 local hovercolor = vmath.vector4(0.6, 0.6, 0.6, 1)
 
+local panelcolor = vmath.vector4(0.2, 0.2, 0.2, 0.9)
+
 M.color_transparent = vmath.vector4(0)
 M.color_black = vmath.vector4(0, 0, 0, 1)
 
@@ -15,7 +17,7 @@ local h_right = hash("right")
 
 
 --########################################  New Button  ########################################
-function M.newbutton(name, node, parent)
+function M.newbutton(name, node, parent, array)
 	local button = {
 		name = name,
 		node = node,
@@ -39,8 +41,17 @@ function M.newbutton(name, node, parent)
 		neighbor_right = nil,
 		hover_adj = M.button_hover_adjacent
 	}
+	array[name] = button
 	gui.set_color(node, normalcolor)
 	return button
+end
+
+--########################################  New Panel  ########################################
+function M.newpanel(name, node, parent, array)
+	local panel = M.newbutton(name, node, parent, array)
+	gui.set_color(node, panelcolor)
+	panel.hover = nil;  panel.unhover = nil;  panel.press = nil;  panel.release = nil
+	return panel
 end
 
 --########################################  Hover Button  ########################################
@@ -78,8 +89,10 @@ function M.button_set_active(self, active) -- need to keep track of enabled/disa
 	self.active = active
 	if active then
 		msg.post(self.parent, "button activated", {btn = self.name})
+		if not self.enabled then self:set_enabled(true) end -- automatically enable when activated
 	else
 		msg.post(self.parent, "button deactivated", {btn = self.name})
+		if self.hovered then self:unhover() end
 	end
 end
 
@@ -103,8 +116,10 @@ end
 --########################################  Update Button  ########################################
 function M.update_button(self, posx, posy)
 	local hovered = gui.pick_node(self.node, posx, posy)
-	if hovered and not self.hovered then self:hover()
-	elseif not hovered and self.hovered then self:unhover()
+	if hovered and not self.hovered then
+		if self.hover then self:hover() end
+	elseif not hovered and self.hovered then
+		if self.unhover then self:unhover() end
 	end
 end
 
@@ -114,5 +129,6 @@ function M.update_buttons_array(array, posx, posy)
 		M.update_button(v, posx, posy)
 	end
 end
+
 
 return M

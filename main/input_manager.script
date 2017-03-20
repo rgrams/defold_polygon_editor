@@ -38,6 +38,7 @@ function windowevent(self, event, data)
 		screen_ratio.x = cur_screensize.x / base_screensize.x
 		screen_ratio.y = cur_screensize.y / base_screensize.y
 		msg.post("cursor/cursor#script", "window resized", {size = cur_screensize})
+		msg.post("#overlay", "window resized", {screen_ratio = screen_ratio})
 	end
 end
 

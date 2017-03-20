@@ -1,22 +1,30 @@
 
 local ui = require "main.interface.interface_module"
 local util = require "main.framework.utilities"
+local input = require "main.framework.input_globals"
 
-local initial_buttons = { "open btn", "clear btn", "save btn", "quit btn" }
+local initial_buttons = { "open btn", "clear btn", "save btn", "quit btn", "load overlay btn", "remove overlay btn", "load overlay ok btn", "load overlay cancel btn" }
+local main_buttons = { "clear btn", "save btn", "load overlay btn", "remove overlay btn", "quit btn" }
+local load_overlay_btns = { "screenfill", "load overlay ok btn", "load overlay cancel btn" }
 local active_buttons = {}
 local cur_hover_btn = nil
 
 local btns = {}
 
+local pathtextnode = "pathtext"
+local pathtext = ""
+local textinput_enabled = false
+
 
 --########################################  Init  ########################################
 function init(self)
+	pathtextnode = gui.get_node(pathtextnode)
+
 	self.myurl = msg.url()
 	gui.set_text(gui.get_node("controls text"), "ctrl-click: add point -- left-click drag: move point -- alt-click: delete point\nshift: snap to 5 px increments -- mouse wheel: zoom -- middle mouse drag: pan" )
 
 	for i, v in ipairs(initial_buttons) do
-		local button = ui.newbutton(v, gui.get_node(v), self.myurl)
-		btns[v] = button
+		local button = ui.newbutton(v, gui.get_node(v), self.myurl, btns)
 		button:set_active(true)
 	end
 
@@ -24,6 +32,13 @@ function init(self)
 	btns["quit btn"].releasefunc = btn_release_quit
 	btns["save btn"].releasefunc = btn_release_save
 	btns["clear btn"].releasefunc = btn_release_clear
+
+	local panel = ui.newpanel("screenfill", gui.get_node("screenfill"), self.myurl, btns)
+	for i, v in ipairs(load_overlay_btns) do btns[v]:set_enabled(false) end
+	btns["load overlay btn"].releasefunc = btn_release_load_overlay
+	btns["remove overlay btn"].releasefunc = btn_release_remove_overlay
+	btns["load overlay ok btn"].releasefunc = btn_release_load_overlay_ok
+	btns["load overlay cancel btn"].releasefunc = close_load_overlay_stuff
 end
 
 --########################################  On Input  ########################################
@@ -36,12 +51,32 @@ function on_input(self, action_id, action)
 
 	elseif action_id == hash("left click") then
 		if cur_hover_btn then
-			if action.pressed then btns[cur_hover_btn]:press()
-			elseif action.released then btns[cur_hover_btn]:release()
+			if action.pressed and btns[cur_hover_btn].press then btns[cur_hover_btn]:press()
+			elseif action.released and btns[cur_hover_btn].release then btns[cur_hover_btn]:release()
 			end
 			return true -- consume event
 		end
+
+	elseif textinput_enabled then
+		if action_id == hash("text") then
+			pathtext = pathtext .. action.text
+			gui.set_text(pathtextnode, pathtext)
+
+		elseif action_id == hash("backspace") then
+			if action.pressed or action.repeated then
+				pathtext = string.sub(pathtext, 1, -2)
+				gui.set_text(pathtextnode, pathtext)
+			end
+
+		elseif action_id == hash("enter") and action.pressed then
+			btn_release_load_overlay_ok()
+
+		end
 	end
+end
+
+function update(self, dt)
+
 end
 
 --########################################  On Message  ########################################
@@ -56,7 +91,7 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("button unhovered") then
 		if cur_hover_btn == message.btn then
 			cur_hover_btn = nil
-			msg.post("main#editor", "gained mouse")
+			if not textinput_enabled then msg.post("main#editor", "gained mouse") end
 		end
 
 	elseif message_id == hash("button activated") then
@@ -64,10 +99,12 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("button deactivated") then
 		util.find_remove(active_buttons, message.btn)
+		if cur_hover_btn == message.btn then cur_hover_btn = nil end
 
 	elseif message_id == hash("polygon saved") then
 		gui.set_color(gui.get_node("savetext"), vmath.vector4(1))
 		gui.animate(gui.get_node("savetext"), "color.w", 0, gui.EASING_OUTSINE, 1.5)
+
 	end
 end
 
@@ -84,4 +121,32 @@ end
 --########################################  Button Release - Clear  ########################################
 function btn_release_clear()
 	msg.post("#editor", "clear polygon")
+end
+
+--########################################  Button Release - Load Overlay  ########################################
+function btn_release_load_overlay()
+	for i, v in ipairs(active_buttons) do btns[v]:set_active(false) end
+	for i, v in ipairs(load_overlay_btns) do btns[v]:set_active(true) end
+	textinput_enabled = true
+	msg.post("main#editor", "lost mouse")
+end
+
+--########################################  Button Release - Load Overlay OK  ########################################
+function btn_release_load_overlay_ok()
+	msg.post("main#overlay", "load image", {image_path = "/main/" .. pathtext})
+	close_load_overlay_stuff()
+end
+
+--########################################  Close Load Overlay Stuff  ########################################
+-- (button release - load overlay cancel)
+function close_load_overlay_stuff()
+	for i, v in ipairs(load_overlay_btns) do btns[v]:set_enabled(false) end
+	for i, v in ipairs(main_buttons) do btns[v]:set_active(true) end
+	textinput_enabled = false
+	msg.post("main#editor", "gained mouse")
+end
+
+--########################################  Button Release - Remove Overlay  ########################################
+function btn_release_remove_overlay()
+	msg.post("main#overlay", "hide")
 end

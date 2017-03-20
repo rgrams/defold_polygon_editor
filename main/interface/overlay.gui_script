@@ -1,0 +1,47 @@
+
+local node
+
+
+--########################################  Init  ########################################
+function init(self)
+	node = gui.get_node("image")
+	gui.set_enabled(node, false)
+end
+
+--########################################  One Message  ########################################
+function on_message(self, message_id, message, sender)
+	if message_id == hash("window resized") then
+		print("Overlay - window resized")
+		local inv_ratio = message.screen_ratio
+		inv_ratio.x = 1 / inv_ratio.x;  inv_ratio.y = 1 / inv_ratio.y
+		gui.set_scale(node, inv_ratio)
+
+	elseif message_id == hash("load image") then
+		load_and_set_texture(message.image_path, node)
+		gui.set_enabled(node, true)
+
+	elseif message_id == hash("hide") then
+		gui.set_enabled(node, false)
+	end
+end
+
+--########################################  Load and Set Texture  ########################################
+function load_and_set_texture(path, node)
+	local loadtex = sys.load_resource(path)
+	if not loadtex then
+		print("Load texture - ERROR - failed to load image resource from disk: ", path)
+		return
+	end
+	local img = image.load(loadtex)
+	if not img then
+		print("Load texture - ERROR - failed to load image")
+		return
+	end
+
+	if gui.new_texture(path, img.width, img.height, img.type, img.buffer) then
+		gui.set_texture(node, path)
+	else
+		print("Load texture - ERROR - failed to create texture")
+	end
+	return true
+end

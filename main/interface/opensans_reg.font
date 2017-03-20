@@ -1,4 +1,4 @@
 font: "/main/interface/OpenSans-Regular.ttf"
 material: "/builtins/fonts/font-df.material"
-size: 15
+size: 13
 output_format: TYPE_DISTANCE_FIELD

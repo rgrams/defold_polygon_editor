@@ -1,6 +1,8 @@
 [project]
 title = Defold Polygon Editor
-version = 0.1.1
+version = 0.2.0
+custom_resources = main
+write_log = 0
 
 [bootstrap]
 main_collection = /main/root.collectionc
@@ -12,4 +14,9 @@ height = 450
 
 [physics]
 scale = 0.02
+
+[input]
+repeat_interval = 0.05
+repeat_delay = 0.3
+game_binding = /input/game.input_bindingc
 
