@@ -60,5 +60,5 @@ nodes {
   size_mode: SIZE_MODE_AUTO
 }
 material: "/main/interface/overlay material/overlay.material"
-adjust_reference: ADJUST_REFERENCE_LEGACY
+adjust_reference: ADJUST_REFERENCE_DISABLED
 max_nodes: 512
