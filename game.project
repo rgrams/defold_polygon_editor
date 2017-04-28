@@ -6,7 +6,7 @@ write_log = 0
 
 [bootstrap]
 main_collection = /main/root.collectionc
-render = /main/camera/render/my.renderc
+render = /main/render/my.renderc
 
 [display]
 width = 1000
@@ -19,4 +19,7 @@ scale = 0.02
 repeat_interval = 0.05
 repeat_delay = 0.3
 game_binding = /input/game.input_bindingc
+
+[script]
+shared_state = 1
 

@@ -1,3 +1,8 @@
+local render_transform = require "main.render_transform"
+
+-- 			A pretty standard render script, but added code to send camera
+-- 		view and projection matrices to the transform module every frame. (on message)
+
 function init(self)
     self.tile_pred = render.predicate({"tile"})
     self.gui_pred = render.predicate({"gui"})
@@ -13,6 +18,9 @@ function init(self)
 
     self.view = vmath.matrix4()
 	self.projection = vmath.matrix4()
+
+	render_transform.window_res = vmath.vector3(render.get_window_width(), render.get_window_height(), 0)
+	render_transform.window_halfres = render_transform.window_res * 0.5
 end
 
 function update(self)
@@ -61,5 +69,7 @@ function on_message(self, message_id, message)
     elseif message_id == hash("set_view_projection") then
         self.view = message.view
         self.projection = message.projection
+		render_transform.view = message.view
+		render_transform.proj = message.projection
     end
 end

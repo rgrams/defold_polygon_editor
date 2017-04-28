@@ -1,20 +1,22 @@
 
 local util = require "main.framework.utilities"
 local input = require "main.framework.input_globals"
+local render_transform = require "main.render_transform"
 
+
+local mouse_wpos = vmath.vector3()
+local last_mouse_wpos = vmath.vector3()
+local mouse_spos = vmath.vector3()
+local campos = vmath.vector3()
+
+local nearz = 100
+local farz = 2000
 local gridsize = 5
-
-local campos = vmath.vector3(0)
 local zoomstep = 100
 local zvect = vmath.vector3(0, 0, zoomstep)
 local panning = false
 
-local mouse_wpos = vmath.vector3(0)
-local mouse_screenpos = vmath.vector3()
-local base_screensize = vmath.vector3()
-local cur_screensize = vmath.vector3()
-local screen_ratio = vmath.vector3(1)
-local scalefactor = 542
+local cursor = "cursor/cursor#script"
 
 
 --########################################  Init  ########################################
@@ -23,35 +25,33 @@ function init(self)
 	msg.post("#gui", "acquire_input_focus")
 	msg.post(".", "acquire_input_focus")
 
-	window.set_listener(windowevent)
 	campos = go.get_position("camera")
-	base_screensize.x = tonumber(sys.get_config("display.width"))
-	base_screensize.y = tonumber(sys.get_config("display.height"))
-	cur_screensize = vmath.vector3(base_screensize)
-	msg.post("cursor/cursor#script", "window resized", {size = cur_screensize})
+	msg.post("camera#camera", "set_camera", {aspect_ratio = 1.0, fov = 0.785, near_z = nearz, far_z = farz})
+	render_transform.set_camera(campos.z, nearz, farz)
+
+	local window_x = tonumber(sys.get_config("display.width"))
+	local window_y = tonumber(sys.get_config("display.height"))
+	render_transform.set_window_res(window_x, window_y)
+
+	window.set_listener(windowevent)
 end
 
 --########################################  Window Event  ########################################
 function windowevent(self, event, data)
 	if event == window.WINDOW_EVENT_RESIZED then
-		cur_screensize.x = data.width;  cur_screensize.y = data.height
-		screen_ratio.x = cur_screensize.x / base_screensize.x
-		screen_ratio.y = cur_screensize.y / base_screensize.y
-		msg.post("cursor/cursor#script", "window resized", {size = cur_screensize})
+		render_transform.set_window_res(data.width, data.height)
+		msg.post(cursor, "window_resized", {size = vmath.vector3(data.width, data.height, 0)})
 	end
 end
 
 --########################################  Update Mousepos  ########################################
 function update_mousepos()
-	input.zoom = campos.z / scalefactor
-	mouse_wpos = (mouse_screenpos - base_screensize * 0.5) * (campos.z / scalefactor)
-	mouse_wpos.x = mouse_wpos.x / screen_ratio.y * screen_ratio.x
-	mouse_wpos = mouse_wpos + vmath.vector3(campos.x, campos.y, 0)
+	mouse_wpos = render_transform.screen_to_world(mouse_spos.x, mouse_spos.y)
 	if input.shift_pressed then
 		mouse_wpos.x = util.round(mouse_wpos.x / gridsize) * gridsize
 		mouse_wpos.y = util.round(mouse_wpos.y / gridsize) * gridsize
 	end
-	msg.post("cursor/cursor#script", "update pos", {pos = mouse_wpos})
+	msg.post(cursor, "update pos", {pos = mouse_wpos})
 	input.mouse_wpos = mouse_wpos
 end
 
@@ -59,12 +59,15 @@ end
 function on_input(self, action_id, action)
 		-- Mouse Movement
 	if action_id == nil then
-		mouse_screenpos.x = action.x;  mouse_screenpos.y = action.y
+		mouse_spos.x = action.screen_x
+		mouse_spos.y = action.screen_y
+
+		update_mousepos()
 		if panning then
-			campos = campos - vmath.vector3(action.dx, action.dy, 0) * (campos.z / scalefactor)
+			local last_mouse_wpos = render_transform.screen_to_world(mouse_spos.x - action.screen_dx, mouse_spos.y - action.screen_dy)
+			campos = campos - (mouse_wpos - last_mouse_wpos)
 			go.set_position(campos, "camera")
 		end
-		update_mousepos()
 
 	elseif action.pressed then
 		if action_id == hash("control") then
@@ -78,13 +81,15 @@ function on_input(self, action_id, action)
 		elseif action_id == hash("mouse wheel up") then
 			campos = campos - zvect
 			go.set_position(campos, "camera")
+			render_transform.set_camera(campos.z)
 			update_mousepos()
-			msg.post("cursor/cursor#script", "zoom")
+			msg.post(cursor, "zoom")
 		elseif action_id == hash("mouse wheel down") then
 			campos = campos + zvect
 			go.set_position(campos, "camera")
+			render_transform.set_camera(campos.z)
 			update_mousepos()
-			msg.post("cursor/cursor#script", "zoom")
+			msg.post(cursor, "zoom")
 		elseif action_id == hash("middle click") then
 			panning = true
 		end
