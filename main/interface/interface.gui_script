@@ -18,6 +18,7 @@ local textinput_enabled = false
 
 --########################################  Init  ########################################
 function init(self)
+	gui.set_render_order(1)
 	pathtextnode = gui.get_node(pathtextnode)
 
 	self.myurl = msg.url()

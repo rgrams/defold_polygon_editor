@@ -16,7 +16,7 @@ local zoomstep = 100
 local zvect = vmath.vector3(0, 0, zoomstep)
 local panning = false
 
-local cursor = "cursor/cursor#script"
+local cursor = "cursor/cursor#gui"
 
 
 --########################################  Init  ########################################
@@ -32,6 +32,7 @@ function init(self)
 	local window_x = tonumber(sys.get_config("display.width"))
 	local window_y = tonumber(sys.get_config("display.height"))
 	render_transform.set_window_res(window_x, window_y)
+	msg.post(cursor, "window resized", {size = vmath.vector3(window_x, window_y, 0)})
 
 	window.set_listener(windowevent)
 end
@@ -40,7 +41,7 @@ end
 function windowevent(self, event, data)
 	if event == window.WINDOW_EVENT_RESIZED then
 		render_transform.set_window_res(data.width, data.height)
-		msg.post(cursor, "window_resized", {size = vmath.vector3(data.width, data.height, 0)})
+		msg.post(cursor, "window resized", {size = vmath.vector3(data.width, data.height, 0)})
 	end
 end
 
@@ -51,7 +52,7 @@ function update_mousepos()
 		mouse_wpos.x = util.round(mouse_wpos.x / gridsize) * gridsize
 		mouse_wpos.y = util.round(mouse_wpos.y / gridsize) * gridsize
 	end
-	msg.post(cursor, "update pos", {pos = mouse_wpos})
+	msg.post(cursor, "update pos", {spos = mouse_spos, wpos = mouse_wpos})
 	input.mouse_wpos = mouse_wpos
 end
 
