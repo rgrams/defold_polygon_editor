@@ -46,8 +46,15 @@ function windowevent(self, event, data)
 end
 
 --########################################  Update Mousepos  ########################################
-function update_mousepos()
+function update_mousepos(dx, dy)
 	mouse_wpos = render_transform.screen_to_world(mouse_spos.x, mouse_spos.y)
+	-- If dx (and dy) passed in and panning, do pan before mouse pos may be snapped to the grid
+	if panning and dx then
+		local last_mouse_wpos = render_transform.screen_to_world(mouse_spos.x - dx, mouse_spos.y - dy)
+		campos = campos - (mouse_wpos - last_mouse_wpos)
+		go.set_position(campos, "camera")
+	end
+
 	if input.shift_pressed then
 		mouse_wpos.x = util.round(mouse_wpos.x / gridsize) * gridsize
 		mouse_wpos.y = util.round(mouse_wpos.y / gridsize) * gridsize
@@ -62,13 +69,7 @@ function on_input(self, action_id, action)
 	if action_id == nil then
 		mouse_spos.x = action.screen_x
 		mouse_spos.y = action.screen_y
-
-		update_mousepos()
-		if panning then
-			local last_mouse_wpos = render_transform.screen_to_world(mouse_spos.x - action.screen_dx, mouse_spos.y - action.screen_dy)
-			campos = campos - (mouse_wpos - last_mouse_wpos)
-			go.set_position(campos, "camera")
-		end
+		update_mousepos(action.screen_dx, action.screen_dy)
 
 	elseif action.pressed then
 		if action_id == hash("control") then
