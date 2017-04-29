@@ -76,8 +76,8 @@ function on_input(self, action_id, action)
 	end
 end
 
+--########################################  Update  ########################################
 function update(self, dt)
-
 end
 
 --########################################  On Message  ########################################
@@ -132,10 +132,26 @@ function btn_release_load_overlay()
 	msg.post("main#editor", "lost mouse")
 end
 
+--########################################  File Exists  ########################################
+function file_exists(path)
+   local f = io.open(path,"r")
+   if f ~= nil then
+	   io.close(f)
+	   return true
+   else
+	   return false
+   end
+end
+
 --########################################  Button Release - Load Overlay OK  ########################################
 function btn_release_load_overlay_ok()
-	msg.post("main#overlay", "load image", {image_path = "/main/" .. pathtext})
-	close_load_overlay_stuff()
+	local path = pathtext .. ".png"
+	if file_exists(path) then
+		msg.post("main#overlay", "load image", {image_path = path})
+		close_load_overlay_stuff()
+	else
+		print("interface - ERROR - invalid file path.")
+	end
 end
 
 --########################################  Close Load Overlay Stuff  ########################################

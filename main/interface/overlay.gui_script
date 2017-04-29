@@ -1,4 +1,7 @@
 
+require "main.framework.pngLua.png"
+local util = require "main.framework.utilities"
+
 local node
 
 
@@ -8,34 +11,51 @@ function init(self)
 	gui.set_enabled(node, false)
 end
 
---########################################  One Message  ########################################
+--########################################  On Message  ########################################
 function on_message(self, message_id, message, sender)
 	if message_id == hash("load image") then
 		load_and_set_texture(message.image_path, node)
-		gui.set_enabled(node, true)
 
 	elseif message_id == hash("hide") then
 		gui.set_enabled(node, false)
 	end
 end
 
+--########################################  Load Progress  ########################################
+function loadProg(line, totalLine)
+	local txt = "Loading image . . . " .. util.round(line/totalLine*100).. "% done."
+	print(txt)
+end
+
 --########################################  Load and Set Texture  ########################################
 function load_and_set_texture(path, node)
-	local loadtex = sys.load_resource(path)
-	if not loadtex then
-		print("Load texture - ERROR - failed to load image resource from disk: ", path)
-		return
-	end
-	local img = image.load(loadtex)
-	if not img then
-		print("Load texture - ERROR - failed to load image")
-		return
-	end
+	local t = os.clock()
 
-	if gui.new_texture(path, img.width, img.height, img.type, img.buffer) then
+	print("Loading overlay image")
+	print("decoding PNG . . .")
+	local img = pngImage(path, loadProg)
+	print("Elapsed time after PNG decoded: ", os.clock() - t)
+
+	local buff = {}
+	for y=1, img.height do
+		for x=1, img.width do
+			local p = img:getPixel(x,y)
+			table.insert(buff, string.char(p.R, p.G, p.B, p.A))
+		end
+	end
+	print("Elapsed time after pixel data tabled: ", os.clock() - t)
+
+	local buffstring = table.concat(buff)
+	print("Buffer string length = ", #buffstring)
+	print("Elapsed time after string concat: ", os.clock() - t)
+
+	if gui.new_texture(path, img.width, img.height, "rgba", buffstring) then
+		print("SUCCESS!")
 		gui.set_texture(node, path)
+		gui.set_enabled(node, true)
 	else
 		print("Load texture - ERROR - failed to create texture")
+		return false
 	end
 	return true
 end

@@ -1,6 +1,6 @@
 [project]
 title = Defold Polygon Editor
-version = 0.2.0
+version = 0.3.0
 custom_resources = main
 write_log = 0
 
