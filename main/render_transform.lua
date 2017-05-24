@@ -10,6 +10,8 @@ M.proj = vmath.matrix4()
 M.window_res = vmath.vector3()
 M.window_halfres = vmath.vector3()
 
+M.zoom = 1
+
 local nearz = 100
 local farz = 1000
 local abs_nearz = nearz -- absolute nearz and farz
@@ -26,6 +28,13 @@ function M.set_camera(zpos, near, far) -- near & far args are optional
 	camz = zpos
 	abs_nearz = camz - nearz
 	abs_farz = camz - farz
+
+	M.update_zoom()
+end
+
+--########################################  Update Zoom  ########################################
+function M.update_zoom()
+	M.zoom = vmath.length(M.screen_to_world(0, 0) - M.screen_to_world(0, 1))
 end
 
 --########################################  Set Window Resolution  ########################################

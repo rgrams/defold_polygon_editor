@@ -2,13 +2,14 @@
 local util = require "main.framework.utilities"
 local collis = require "main.framework.collision_module"
 local input = require "main.framework.input_globals"
+local render_transform = require "main.render_transform"
 
 local vertfact = "#vertfact"
 local segfact = "#segfact"
 
 local has_mouse = true
 local hoverobj = nil
-local vert_collis_radius = 15
+local vert_collis_radius = 8
 local drag = {on = false, obj = nil, i = 0, offset = vmath.vector3()}
 
 local debugcolor = vmath.vector4(1, 1, 0, 1)
@@ -93,7 +94,7 @@ end
 
 --########################################  Spawn Vert Obj  ########################################
 function spawn_vert_obj(self, pos, index)
-	local vert = factory.create(vertfact, pos, nil, {i = index})
+	local vert = factory.create(vertfact, pos, nil, {i = index}, vmath.vector3(render_transform.zoom))
 	table.insert(self.verts, index, vert)
 	return vert
 end
@@ -110,7 +111,7 @@ function spawn_seg(self, startindex)
 		normvect = vmath.normalize(vect),
 		length = vmath.length(vect)
 	}
-	local seg = factory.create(segfact, pos, util.vect_to_quat(vect), props, 1.0)
+	local seg = factory.create(segfact, pos, util.vect_to_quat(vect), props, vmath.vector3(1, render_transform.zoom, 1))
 	table.insert(self.segs, startindex, seg)
 end
 
@@ -150,7 +151,7 @@ function update(self, dt)
 			local lasthoverobj = hoverobj
 			hoverobj = nil
 			for i, v in ipairs(self.verts) do
-				local hitdist = collis.collide_circle_circle(go.get_position(v), vert_collis_radius * input.zoom, input.mouse_wpos, 1)
+				local hitdist = collis.collide_circle_circle(go.get_position(v), vert_collis_radius * render_transform.zoom, input.mouse_wpos, 1)
 				if not hitdist and v == lasthoverobj then
 					msg.post(v, "mouse exit")
 				elseif hitdist and hitdist < dist then
@@ -209,5 +210,14 @@ function on_message(self, message_id, message, sender)
 		msg.post(sender, "poly points", {points = pointarray})
 	elseif message_id == hash("clear polygon") then
 		clear_polygon(self)
+
+	elseif message_id == hash("zoom") then
+		local z = render_transform.zoom
+		for i, v in ipairs(self.verts) do
+			go.set_scale(z, v)
+		end
+		for i, v in ipairs(self.segs) do
+			go.set(v, "scale.y", z)
+		end
 	end
 end

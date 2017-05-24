@@ -63,6 +63,8 @@ function update(self)
     render.draw_debug2d()
 end
 
+local firstframe = true
+
 function on_message(self, message_id, message)
     if message_id == hash("clear_color") then
         self.clear_color = message.color
@@ -71,5 +73,6 @@ function on_message(self, message_id, message)
         self.projection = message.projection
 		render_transform.view = message.view
 		render_transform.proj = message.projection
+		if firstframe then render_transform.update_zoom() firstframe = false end
     end
 end

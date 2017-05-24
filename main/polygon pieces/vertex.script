@@ -7,14 +7,14 @@ local hoverscale = vmath.vector3(0.08)
 
 function init(self)
 	self.dragging = false
-	go.set_scale(basescale)
+	go.set("#sprite", "scale", basescale)
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("mouse enter") then
-		go.set_scale(hoverscale)
+		go.set("#sprite", "scale", hoverscale)
 	elseif message_id == hash("mouse exit") then
-		go.set_scale(basescale)
+		go.set("#sprite", "scale", basescale)
 	elseif message_id == hash("drag start") then
 		self.dragging = true
 	elseif message_id == hash("drag end") then

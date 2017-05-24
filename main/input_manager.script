@@ -3,7 +3,6 @@ local util = require "main.framework.utilities"
 local input = require "main.framework.input_globals"
 local render_transform = require "main.render_transform"
 
-
 local mouse_wpos = vmath.vector3()
 local last_mouse_wpos = vmath.vector3()
 local mouse_spos = vmath.vector3()
@@ -17,11 +16,12 @@ local zvect = vmath.vector3(0, 0, zoomstep)
 local panning = false
 
 local cursor = "cursor/cursor#gui"
+local editor = "#editor"
 
 
 --########################################  Init  ########################################
 function init(self)
-	msg.post("#editor", "acquire_input_focus")
+	msg.post(editor, "acquire_input_focus")
 	msg.post("#gui", "acquire_input_focus")
 	msg.post(".", "acquire_input_focus")
 
@@ -91,12 +91,14 @@ function on_input(self, action_id, action)
 			render_transform.set_camera(campos.z)
 			update_mousepos()
 			msg.post(cursor, "zoom")
+			msg.post(editor, "zoom")
 		elseif action_id == hash("mouse wheel down") then
 			campos = campos + zvect
 			go.set_position(campos, "camera")
 			render_transform.set_camera(campos.z)
 			update_mousepos()
 			msg.post(cursor, "zoom")
+			msg.post(editor, "zoom")
 		elseif action_id == hash("middle click") then
 			panning = true
 		end
@@ -116,7 +118,7 @@ end
 
 --########################################  Final  ########################################
 function final(self)
-	msg.post("#editor", "release_input_focus")
+	msg.post(editor, "release_input_focus")
 	msg.post("#gui", "release_input_focus")
 	msg.post(".", "release_input_focus")
 end

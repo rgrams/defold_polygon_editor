@@ -23,7 +23,7 @@ function update_everything(self)
 	self.vect = self.endpt - go.get_position()
 	self.normvect = vmath.normalize(self.vect)
 	self.length = vmath.length(self.vect)
-	go.set_scale(vmath.vector3(self.length / spritesize.y, 1.5, 1))
+	go.set_scale(vmath.vector3(self.length / spritesize.y, go.get_scale().y, 1))
 	go.set_rotation(util.vect_to_quat(self.vect))
 
 	update_collision_points(self)
