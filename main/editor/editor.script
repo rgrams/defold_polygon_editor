@@ -160,6 +160,8 @@ function update(self, dt)
 				if not hitdist and v == lasthoverobj then
 					msg.post(v, "mouse exit")
 				elseif hitdist and hitdist < dist then
+					msg.post(lasthoverobj, "mouse exit")
+					lasthoverobj = v
 					msg.post(v, "mouse enter")
 					hoverobj = v
 					dist = hitdist
