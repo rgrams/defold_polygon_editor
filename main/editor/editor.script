@@ -151,7 +151,12 @@ function update(self, dt)
 			local lasthoverobj = hoverobj
 			hoverobj = nil
 			for i, v in ipairs(self.verts) do
-				local hitdist = collis.collide_circle_circle(go.get_position(v), vert_collis_radius * render_transform.zoom, input.mouse_wpos, 1)
+				local hitdist = collis.collide_circle_circle(
+					go.get_position(v),
+					vert_collis_radius * render_transform.zoom,
+					input.mouse_wpos,
+					render_transform.zoom
+				)
 				if not hitdist and v == lasthoverobj then
 					msg.post(v, "mouse exit")
 				elseif hitdist and hitdist < dist then
