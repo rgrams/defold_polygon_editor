@@ -76,10 +76,6 @@ function on_input(self, action_id, action)
 	end
 end
 
---########################################  Update  ########################################
-function update(self, dt)
-end
-
 --########################################  On Message  ########################################
 function on_message(self, message_id, message, sender)
 

@@ -48,6 +48,7 @@ end
 --########################################  Update Mousepos  ########################################
 function update_mousepos(dx, dy)
 	-- If dx (and dy) passed in and panning, do pan before mouse pos may be snapped to the grid
+	-- Called without dx and dy when zooming
 	if panning and dx then
 		-- need new wpos to get correct panning vect, but shouldn't allow cursor wpos to change
 		local last_mouse_wpos = render_transform.screen_to_world(mouse_spos.x - dx, mouse_spos.y - dy)
@@ -64,7 +65,7 @@ function update_mousepos(dx, dy)
 		-- refigure screen pos from snapped world pos
 		mouse_spos = render_transform.world_to_screen(mouse_wpos)
 	end
-	msg.post(cursor, "update pos", {spos = mouse_spos, wpos = mouse_wpos})
+	msg.post(cursor, "update pos", {wpos = mouse_wpos})
 	input.mouse_wpos = mouse_wpos
 end
 

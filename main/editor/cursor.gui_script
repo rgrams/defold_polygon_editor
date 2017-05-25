@@ -1,5 +1,6 @@
 
 local util = require "main.framework.utilities"
+local render_transform = require "main.render_transform"
 
 local line_width = 2.5
 
@@ -8,32 +9,44 @@ local line_width = 2.5
 function init(self)
 	gui.set_render_order(0)
 	self.winsize = vmath.vector3()
-	self.mouse_spos = vmath.vector3()
+	self.spos = vmath.vector3()
+	self.wpos = vmath.vector3()
 	self.x = gui.get_node("x")
 	self.y = gui.get_node("y")
 	self.linex = gui.get_node("linex")
 	self.liney = gui.get_node("liney")
 	self.reticle = gui.get_node("reticle")
+	self.drag_offset = vmath.vector3()
+end
+
+--########################################  Update Pos  ########################################
+function update_pos(self, wpos)
+	self.wpos = wpos + self.drag_offset
+	self.spos = render_transform.world_to_screen(self.wpos)
+	gui.set_text(self.x, util.round(self.wpos.x * 100)/100)
+	gui.set_text(self.y, util.round(self.wpos.y * 100)/100)
+	gui.set_position(self.reticle, self.spos)
+	gui.set_position(self.linex, vmath.vector3(self.spos.x, self.winsize.y/2, 0))
+	gui.set_position(self.liney, vmath.vector3(self.winsize.x/2, self.spos.y, 0))
 end
 
 --########################################  On Message  ########################################
 function on_message(self, message_id, message, sender)
 		-- Update Pos
 	if message_id == hash("update pos") then
-		self.mouse_spos = message.spos
-		gui.set_text(self.x, util.round(message.wpos.x * 100)/100)
-		gui.set_text(self.y, util.round(message.wpos.y * 100)/100)
-		gui.set_position(self.reticle, message.spos)
-		gui.set_position(self.linex, vmath.vector3(message.spos.x, self.winsize.y/2, 0))
-		gui.set_position(self.liney, vmath.vector3(self.winsize.x/2, message.spos.y, 0))
+		update_pos(self, message.wpos)
 
 		-- Window Resized
 	elseif message_id == hash("window resized") then
 		self.winsize = message.size
 		gui.set_size(self.linex, vmath.vector3(line_width, message.size.y, 0))
 		gui.set_size(self.liney, vmath.vector3(line_width, message.size.x, 0))
-		gui.set_position(self.linex, vmath.vector3(self.mouse_spos.x, self.winsize.y/2, 0))
-		gui.set_position(self.liney, vmath.vector3(self.winsize.x/2, self.mouse_spos.y, 0))
+		gui.set_position(self.linex, vmath.vector3(self.spos.x, self.winsize.y/2, 0))
+		gui.set_position(self.liney, vmath.vector3(self.winsize.x/2, self.spos.y, 0))
 
+	elseif message_id == hash("drag offset") then
+		self.wpos = self.wpos - self.drag_offset
+		self.drag_offset = message.offset
+		update_pos(self, self.wpos)
 	end
 end
