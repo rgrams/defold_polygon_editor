@@ -70,6 +70,7 @@ function M.save_polygon(path, ...)
 	io.output(path)
 	io.write(string)
 	io.output():close()
+	msg.post("main#gui", "display message", {text = "Polygon Saved"})
 end
 
 

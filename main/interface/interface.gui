@@ -483,7 +483,7 @@ nodes {
 }
 nodes {
   position {
-    x: 471.58
+    x: 500.0
     y: 430.918
     z: 0.0
     w: 1.0
@@ -545,7 +545,7 @@ nodes {
 }
 nodes {
   position {
-    x: 503.119
+    x: 500.0
     y: 391.061
     z: 0.0
     w: 1.0
@@ -557,9 +557,9 @@ nodes {
     w: 1.0
   }
   scale {
-    x: 1.0
-    y: 1.0
-    z: 1.0
+    x: 1.25
+    y: 1.25
+    z: 1.25
     w: 1.0
   }
   size {
@@ -575,10 +575,10 @@ nodes {
     w: 1.0
   }
   type: TYPE_TEXT
-  blend_mode: BLEND_MODE_ALPHA
+  blend_mode: BLEND_MODE_ADD
   text: "POLYGON SAVED"
   font: "opensans_reg"
-  id: "savetext"
+  id: "message text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER

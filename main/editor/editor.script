@@ -301,13 +301,17 @@ function on_message(self, message_id, message, sender)
 			go.set(v, "scale.y", z)
 		end
 	elseif message_id == hash("save polygon") then
-		local code, path = diags.save(fileExt, savePath)
-		if code == 1 then
-			path = fileman.ensure_file_extension(path)
-			savePath = fileman.get_path_dir(path)
-			local pointarray = {}
-			for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
-			fileman.save_polygon(path, unpack(pointarray))
+		if #self.verts >= 3 then
+			local code, path = diags.save(fileExt, savePath)
+			if code == 1 then
+				path = fileman.ensure_file_extension(path)
+				savePath = fileman.get_path_dir(path)
+				local pointarray = {}
+				for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
+				fileman.save_polygon(path, unpack(pointarray))
+			end
+		else
+			msg.post("#gui", "display message", {text = "Need at least 3 verts to make a polygon"})
 		end
 	end
 end

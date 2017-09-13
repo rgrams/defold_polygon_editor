@@ -34,7 +34,8 @@ end
 --########################################  On Message  ########################################
 function on_message(self, message_id, message, sender)
 	if message_id == hash("load image") then
-		load_and_set_image(message.image_path, node)
+		local loaded = load_and_set_image(message.image_path, node)
+		if not loaded then msg.post("#gui", "display message", {text = "Failed to load image"}) end
 
 	elseif message_id == hash("toggle") then
 		gui.set_enabled(node, not gui.is_enabled(node))

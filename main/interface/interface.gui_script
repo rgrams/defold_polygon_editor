@@ -6,6 +6,8 @@ local fileman = require "main.file_manager"
 
 local openPath = ""
 
+local messageNode
+
 local initial_buttons = { "open btn", "clear btn", "save btn", "quit btn", "load overlay btn", "toggle overlay btn" }
 local main_buttons = { "clear btn", "save btn", "load overlay btn", "toggle overlay btn", "quit btn" }
 local active_buttons = {}
@@ -33,6 +35,8 @@ function init(self)
 
 	btns["load overlay btn"].releasefunc = btn_release_load_overlay
 	btns["toggle overlay btn"].releasefunc = btn_release_toggle_overlay
+
+	messageNode = gui.get_node("message text")
 end
 
 --########################################  On Input  ########################################
@@ -51,6 +55,14 @@ function on_input(self, action_id, action)
 			return true -- consume event
 		end
 	end
+end
+
+--########################################  Display Message  ########################################
+local function display_message(text)
+	gui.cancel_animation(messageNode, "color")
+	gui.set_text(messageNode, text)
+	gui.set_color(messageNode, vmath.vector4(1))
+	gui.animate(messageNode, "color.w", 0, gui.EASING_INSINE, 1.5)
 end
 
 --########################################  On Message  ########################################
@@ -75,10 +87,8 @@ function on_message(self, message_id, message, sender)
 		util.find_remove(active_buttons, message.btn)
 		if cur_hover_btn == message.btn then cur_hover_btn = nil end
 
-	elseif message_id == hash("polygon saved") then
-		gui.set_color(gui.get_node("savetext"), vmath.vector4(1))
-		gui.animate(gui.get_node("savetext"), "color.w", 0, gui.EASING_OUTSINE, 1.5)
-
+	elseif message_id == hash("display message") then
+		display_message(message.text)
 	end
 end
 
