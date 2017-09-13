@@ -1,5 +1,4 @@
 
-require "main.framework.pngLua.png"
 local util = require "main.framework.utilities"
 
 local node
@@ -11,51 +10,33 @@ function init(self)
 	gui.set_enabled(node, false)
 end
 
+--########################################  Load and Set Image  ########################################
+local function load_and_set_image(path, node)
+	local success = true
+
+	local t = socket.gettime()
+	local f = io.open(path, "rb")
+	local bytes = f:read("*a")
+	local img = image.load(bytes)
+	if img then
+		local channels = #img.buffer / (img.width * img.height)
+		gui.new_texture(path, img.width, img.height, string.sub("rgba", 1, channels), img.buffer)
+		gui.set_texture(node, path)
+		gui.set_enabled(node, true)
+		print("Image loaded in " .. (socket.gettime() - t) * 1000 .. "ms")
+	else
+		print("ERROR: Failed to load: " .. path)
+		success = false
+	end
+	return success
+end
+
 --########################################  On Message  ########################################
 function on_message(self, message_id, message, sender)
 	if message_id == hash("load image") then
-		load_and_set_texture(message.image_path, node)
+		load_and_set_image(message.image_path, node)
 
 	elseif message_id == hash("hide") then
 		gui.set_enabled(node, false)
 	end
-end
-
---########################################  Load Progress  ########################################
-function loadProg(line, totalLine)
-	local txt = "Loading image . . . " .. util.round(line/totalLine*100).. "% done."
-	print(txt)
-end
-
---########################################  Load and Set Texture  ########################################
-function load_and_set_texture(path, node)
-	local t = os.clock()
-
-	print("Loading overlay image")
-	print("decoding PNG . . .")
-	local img = pngImage(path, loadProg)
-	print("Elapsed time after PNG decoded: ", os.clock() - t)
-
-	local buff = {}
-	for y=1, img.height do
-		for x=1, img.width do
-			local p = img:getPixel(x,y)
-			table.insert(buff, string.char(p.R, p.G, p.B, p.A))
-		end
-	end
-	print("Elapsed time after pixel data tabled: ", os.clock() - t)
-
-	local buffstring = table.concat(buff)
-	print("Buffer string length = ", #buffstring)
-	print("Elapsed time after string concat: ", os.clock() - t)
-
-	if gui.new_texture(path, img.width, img.height, "rgba", buffstring) then
-		print("SUCCESS!")
-		gui.set_texture(node, path)
-		gui.set_enabled(node, true)
-	else
-		print("Load texture - ERROR - failed to create texture")
-		return false
-	end
-	return true
 end

@@ -1286,7 +1286,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "(from the program folder, not including the file extension.)"
+  text: "(from the program folder and including the file extension.)"
   font: "opensans_reg"
   id: "type path expl text"
   xanchor: XANCHOR_NONE

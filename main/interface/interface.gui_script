@@ -141,7 +141,7 @@ end
 
 --########################################  Button Release - Load Overlay OK  ########################################
 function btn_release_load_overlay_ok()
-	local path = pathtext .. ".png"
+	local path = pathtext
 	if file_exists(path) then
 		msg.post("main#overlay", "load image", {image_path = path})
 		close_load_overlay_stuff()
