@@ -91,6 +91,9 @@ function clear_polygon(self)
 		go.delete(v)
 		self.segs[i] = nil
 	end
+	for i, v in ipairs(self.concave_verts) do
+		self.concave_verts[i] = nil
+	end
 	self.curi = 0
 	hoverobj = nil
 	drag.on = false
@@ -125,8 +128,8 @@ function update_indices(self)
 	for i, v in ipairs(self.segs) do msg.post(v, "set i", {index = i}) end
 	if table.maxn(self.segs) > 2 then
 		msg.post(self.segs[table.maxn(self.segs)], "last segment")
-		check_poly_convex(self)
 	end
+	check_poly_convex(self)
 end
 
 
@@ -152,31 +155,33 @@ function check_poly_convex(self)
 		unset_concave_vert(self, k, v)
 	end
 
-	-- Get and store angle at each vert
-	local anglesigns = {}
-	for i, v in ipairs(self.verts) do
-		local vec1 = go.get(util.scripturl(util.prevval(self.segs, i)), "normvect")
-		local vec2 = go.get(util.scripturl(self.segs[i]), "normvect")
-		local a = math.atan2(vec2.y, vec2.x) - math.atan2(vec1.y, vec1.x)
-		if a > math.pi then a = a - math.pi*2 -- if the computed angle is more than 180 in either direction, flip it
-		elseif a < -math.pi then a = a + math.pi*2
+	if #self.verts > 3 then
+		-- Get and store angle at each vert
+		local anglesigns = {}
+		for i, v in ipairs(self.verts) do
+			local vec1 = go.get(util.scripturl(util.prevval(self.segs, i)), "normvect")
+			local vec2 = go.get(util.scripturl(self.segs[i]), "normvect")
+			local a = math.atan2(vec2.y, vec2.x) - math.atan2(vec1.y, vec1.x)
+			if a > math.pi then a = a - math.pi*2 -- if the computed angle is more than 180 in either direction, flip it
+			elseif a < -math.pi then a = a + math.pi*2
+			end
+			if a >= 0 then anglesigns[i] = 1
+			else anglesigns[i] = -1
+			end
 		end
-		if a >= 0 then anglesigns[i] = 1
-		else anglesigns[i] = -1
-		end
-	end
 
-	-- Add up the signs of all verts to figure the direction of the majority of verts
-	local totalsign = 0
-	for i, v in ipairs(anglesigns) do totalsign = totalsign + v end
-	local dir = 1
-	if totalsign < 0 then dir = -1 end
+		-- Add up the signs of all verts to figure the direction of the majority of verts
+		local totalsign = 0
+		for i, v in ipairs(anglesigns) do totalsign = totalsign + v end
+		local dir = 1
+		if totalsign < 0 then dir = -1 end
 
-	-- If not all verts are convex in the majority direction, highlight the concave verts
-	if math.abs(totalsign) < (#self.verts) then
-		for i, v in ipairs(anglesigns) do
-			if v ~= dir then
-				set_concave_vert(self, i, self.verts[i])
+		-- If not all verts are convex in the majority direction, highlight the concave verts
+		if math.abs(totalsign) < (#self.verts) then
+			for i, v in ipairs(anglesigns) do
+				if v ~= dir then
+					set_concave_vert(self, i, self.verts[i])
+				end
 			end
 		end
 	end
