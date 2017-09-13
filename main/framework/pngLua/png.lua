@@ -1,6 +1,6 @@
-class = require 'main.original pngLua.30log'
-deflate = require 'main.original pngLua.deflate'
-require 'main.original pngLua.stream'
+class = require 'main.framework.pngLua.30log'
+deflate = require 'main.framework.pngLua.deflate'
+require 'main.framework.pngLua.stream'
 
 Chunk = class()
 Chunk.__name = "Chunk"
