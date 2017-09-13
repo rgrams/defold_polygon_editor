@@ -2,9 +2,8 @@
 local M = {}
 
 local basestring = "shape_type: TYPE_HULL"
-local string = "shape_type: TYPE_HULL"
-local filename_base = "polygon_"
-local filename_ext = ".convexshape"
+local string = basestring
+local fileExt = "convexshape"
 
 
 --########################################  Sort Verts Anticlockwise  ########################################
@@ -38,7 +37,7 @@ local function sort_verts_anticlockwise(verts)
 end
 
 --########################################  String - Add Points  ########################################
-function M.string_add_points(...)
+local function string_add_points(...)
 	local args = sort_verts_anticlockwise({...})
 	print("File Manager - adding points to string")
 	for i, v in ipairs(args) do
@@ -46,12 +45,28 @@ function M.string_add_points(...)
 	end
 end
 
+--########################################  Ensure File Extension  ########################################
+function M.ensure_file_extension(path)
+	local dotPos = string.find(path, "%.[^%.]+$")
+	if dotPos and string.sub(path, dotPos+1) == fileExt then
+		return path
+	else
+		path = path .. "." .. fileExt
+	end
+	return path
+end
+
+--########################################  Get Path Directory  ########################################
+function M.get_path_dir(path)
+	local slashPos = string.find(path, "[/\\][^/\\]*$")
+	return string.sub(path, 1, slashPos)
+end
+
 --########################################  Save Polygon  ########################################
-function M.save_polygon(...)
+function M.save_polygon(path, ...)
 	print("File Manager - saving file")
 	string = basestring
-	M.string_add_points(...)
-	local path = filename_base .. tostring(os.time()) .. filename_ext
+	string_add_points(...)
 	io.output(path)
 	io.write(string)
 	io.output():close()

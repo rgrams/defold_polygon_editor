@@ -3,6 +3,10 @@ local util = require "main.framework.utilities"
 local collis = require "main.framework.collision_module"
 local input = require "main.framework.input_globals"
 local render_transform = require "main.render_transform"
+local fileman = require "main.file_manager"
+
+local fileExt = "convexshape"
+local savePath = ""
 
 local vertfact = "#vertfact"
 local segfact = "#segfact"
@@ -285,10 +289,6 @@ function on_message(self, message_id, message, sender)
 			msg.post(drag.obj, "drag end")
 			msg.post(cursor, "drag offset", {offset = drag.offset})
 		end
-	elseif message_id == hash("request poly points") then
-		local pointarray = {}
-		for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
-		msg.post(sender, "poly points", {points = pointarray})
 	elseif message_id == hash("clear polygon") then
 		clear_polygon(self)
 
@@ -299,6 +299,15 @@ function on_message(self, message_id, message, sender)
 		end
 		for i, v in ipairs(self.segs) do
 			go.set(v, "scale.y", z)
+		end
+	elseif message_id == hash("save polygon") then
+		local code, path = diags.save(fileExt, savePath)
+		if code == 1 then
+			path = fileman.ensure_file_extension(path)
+			savePath = fileman.get_path_dir(path)
+			local pointarray = {}
+			for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
+			fileman.save_polygon(path, unpack(pointarray))
 		end
 	end
 end

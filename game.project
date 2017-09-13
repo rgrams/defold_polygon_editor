@@ -1,8 +1,8 @@
 [project]
 title = Defold Polygon Editor
 version = 0.3.0
-custom_resources = main
 write_log = 0
+dependencies = https://github.com/andsve/def-diags/archive/master.zip
 
 [bootstrap]
 main_collection = /main/root.collectionc
