@@ -71,7 +71,6 @@ end
 --########################################  Press Button  ########################################
 function M.press_button(self)
 	self.pressed = true
-	print(self.name, " button pressed")
 	gui.set_color(self.node, presscolor)
 	if self.pressfunc then self.pressfunc() end
 end
@@ -79,7 +78,6 @@ end
 --########################################  Release Button  ########################################
 function M.release_button(self)
 	self.pressed = false
-	print(self.name, " button released")
 	gui.set_color(self.node, normalcolor)
 	if self.releasefunc then self.releasefunc() end
 end
