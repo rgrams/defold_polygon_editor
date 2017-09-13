@@ -6,8 +6,6 @@ local string = "shape_type: TYPE_HULL"
 local filename_base = "polygon_"
 local filename_ext = ".convexshape"
 
-local xyz = { "x", "y", "z" }
-
 
 --########################################  Sort Verts Anticlockwise  ########################################
 local function sort_verts_anticlockwise(verts)
@@ -44,9 +42,7 @@ function M.string_add_points(...)
 	local args = sort_verts_anticlockwise({...})
 	print("File Manager - adding points to string")
 	for i, v in ipairs(args) do
-		for i = 1, 3 do
-			string = string .. "\ndata: " .. v[xyz[i]]
-		end
+		string = string.format("%s\ndata: %.3f\ndata: %.3f\ndata: %.1f", string, v.x, v.y, 0)
 	end
 end
 
