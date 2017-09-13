@@ -37,7 +37,7 @@ function init(self)
 	local panel = ui.newpanel("screenfill", gui.get_node("screenfill"), self.myurl, btns)
 	for i, v in ipairs(load_overlay_btns) do btns[v]:set_enabled(false) end
 	btns["load overlay btn"].releasefunc = btn_release_load_overlay
-	btns["remove overlay btn"].releasefunc = btn_release_remove_overlay
+	btns["remove overlay btn"].releasefunc = btn_release_toggle_overlay
 	btns["load overlay ok btn"].releasefunc = btn_release_load_overlay_ok
 	btns["load overlay cancel btn"].releasefunc = close_load_overlay_stuff
 end
@@ -160,6 +160,6 @@ function close_load_overlay_stuff()
 end
 
 --########################################  Button Release - Remove Overlay  ########################################
-function btn_release_remove_overlay()
-	msg.post("main#overlay", "hide")
+function btn_release_toggle_overlay()
+	msg.post("main#overlay", "toggle")
 end

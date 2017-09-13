@@ -1043,7 +1043,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "remove overlay"
+  text: "toggle overlay"
   font: "opensans_reg"
   id: "remove overlay label"
   xanchor: XANCHOR_NONE
