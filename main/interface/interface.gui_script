@@ -28,8 +28,8 @@ function init(self)
 		button:set_active(true)
 	end
 
-	btns["open btn"]:set_enabled(false)
 	btns["quit btn"].releasefunc = btn_release_quit
+	btns["open btn"].releasefunc = btn_release_open
 	btns["save btn"].releasefunc = btn_release_save
 	btns["clear btn"].releasefunc = btn_release_clear
 
@@ -95,6 +95,11 @@ end
 --########################################  Button Release - Quit  ########################################
 function btn_release_quit()
 	msg.post("@system:", "exit", {code = 0})
+end
+
+--########################################  Button Release - Open  ########################################
+function btn_release_open()
+	msg.post("#editor", "open polygon")
 end
 
 --########################################  Button Release - Save  ########################################

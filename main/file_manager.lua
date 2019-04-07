@@ -62,6 +62,32 @@ function M.get_path_dir(path)
 	return string.sub(path, 1, slashPos)
 end
 
+--########################################  Open Polygon  ########################################
+function M.open_polygon(path)
+	print("File Manager - opening file")
+	local numberarray = {}
+	for line in io.lines(path) do 
+		local _, number_index = string.find(line, "data:%s*[-%d]")
+		if number_index then
+			local number = tonumber(string.sub(line, number_index))
+			table.insert(numberarray, number)
+		end
+	end
+
+	local pointarray = {}
+	for p = 1, (#numberarray / 3) do
+		local i = ((p - 1) * 3) + 1
+		local x = numberarray[i]
+		local y = numberarray[i + 1]
+		local z = numberarray[i + 2]
+		local pos = vmath.vector3(x, y, z)
+		table.insert(pointarray, pos)
+	end 
+
+	msg.post("main#gui", "display message", {text = "Polygon Opened"})
+	return pointarray
+end
+
 --########################################  Save Polygon  ########################################
 function M.save_polygon(path, ...)
 	print("File Manager - saving file")

@@ -155,8 +155,8 @@ end
 --########################################  Check Poly Convex  ########################################
 function check_poly_convex(self)
 	-- Reset any previously concave verts
-	for k, v in pairs(self.concave_verts) do
-		unset_concave_vert(self, k, v)
+	for i, v in ipairs(self.concave_verts) do
+		unset_concave_vert(self, i, v)
 	end
 
 	if #self.verts > 3 then
@@ -300,6 +300,15 @@ function on_message(self, message_id, message, sender)
 		for i, v in ipairs(self.segs) do
 			go.set(v, "scale.y", z)
 		end
+	elseif message_id == hash("open polygon") then
+		local code, path = diags.open(nil, openPath)
+		if code == 1 then
+			local openPath = fileman.get_path_dir(path)
+			local pointarray = fileman.open_polygon(path)
+			for i, v in ipairs(pointarray) do 
+				add_point(self, v)
+			end
+		end		 
 	elseif message_id == hash("save polygon") then
 		if #self.verts >= 3 then
 			local code, path = diags.save(fileExt, savePath)
