@@ -6,7 +6,6 @@ local render_transform = require "main.render_transform"
 local fileman = require "main.file_manager"
 
 local fileExt = "convexshape"
-local savePath = ""
 
 local vertfact = "#vertfact"
 local segfact = "#segfact"
@@ -303,9 +302,9 @@ function on_message(self, message_id, message, sender)
 			go.set(v, "scale.y", z)
 		end
 	elseif message_id == hash("open polygon") then
-		local code, path = diags.open(nil, openPath)
-		if code == 1 then
-			local openPath = fileman.get_path_dir(path)
+		local path = fileman.get_open_path()
+		if path then
+			fileman.baseDialogPath = fileman.get_path_dir(path)
 			local pointarray = fileman.open_polygon(path)
 			for i, v in ipairs(pointarray) do
 				add_point(self, v)
@@ -313,10 +312,10 @@ function on_message(self, message_id, message, sender)
 		end
 	elseif message_id == hash("save polygon") then
 		if #self.verts >= 3 then
-			local code, path = diags.save(fileExt, savePath)
-			if code == 1 then
+			local path = fileman.get_save_path()
+			if path then
 				path = fileman.ensure_file_extension(path)
-				savePath = fileman.get_path_dir(path)
+				fileman.baseDialogPath = fileman.get_path_dir(path)
 				local pointarray = {}
 				for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
 				fileman.save_polygon(path, unpack(pointarray))

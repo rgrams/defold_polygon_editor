@@ -4,8 +4,6 @@ local util = require "main.framework.utilities"
 local input = require "main.framework.input_globals"
 local fileman = require "main.file_manager"
 
-local openPath = ""
-
 local messageNode
 
 local initial_buttons = { "open btn", "clear btn", "save btn", "quit btn", "load overlay btn", "toggle overlay btn" }
@@ -114,9 +112,9 @@ end
 
 --########################################  Button Release - Load Overlay  ########################################
 function btn_release_load_overlay()
-	local code, path = diags.open(nil, openPath)
-	if code == 1 then
-		openPath = fileman.get_path_dir(path)
+	local path = fileman.get_open_path()
+	if path then
+		fileman.baseDialogPath = fileman.get_path_dir(path)
 		msg.post("main#overlay", "load image", {image_path = path})
 	end
 end

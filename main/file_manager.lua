@@ -4,7 +4,9 @@ local M = {}
 local basestring = "shape_type: TYPE_HULL"
 local string = basestring
 local fileExt = "convexshape"
+local defaultFilename = "my_polygon"
 
+M.baseDialogPath = sys.get_application_path()
 
 --########################################  Sort Verts Anticlockwise  ########################################
 local function sort_verts_anticlockwise(verts)
@@ -64,9 +66,11 @@ end
 
 --########################################  Open Polygon  ########################################
 function M.open_polygon(path)
-	print("File Manager - opening file")
+	print("File Manager - opening file -"..path.."-")
 	local numberarray = {}
-	for line in io.lines(path) do 
+	local file, err = io.open(path)
+	print(file, err)
+	for line in io.lines(path) do
 		local _, number_index = string.find(line, "data:%s*[-%d]")
 		if number_index then
 			local number = tonumber(string.sub(line, number_index))
@@ -82,7 +86,7 @@ function M.open_polygon(path)
 		local z = numberarray[i + 2]
 		local pos = vmath.vector3(x, y, z)
 		table.insert(pointarray, pos)
-	end 
+	end
 
 	msg.post("main#gui", "display message", {text = "Polygon Opened"})
 	return pointarray
@@ -96,8 +100,58 @@ function M.save_polygon(path, ...)
 	io.output(path)
 	io.write(string)
 	io.output():close()
-	msg.post("main#gui", "display message", {text = "Polygon Saved"})
+	msg.post("main#gui", "display message", {text = "Polygon Saved To:\n"..path})
 end
+
+--########################################  Get Save Path  ########################################
+function M.get_save_path()
+	local code, path
+	if diags then
+		print("Using native extension dialogs...")
+		code, path = diags.save(nil, M.baseDialogPath)
+		if code ~= 1 then path = nil end
+	elseif sys.get_sys_info().system_name == "Linux" then -- Try using Zenity.
+		print("On Linux, trying Zenity...")
+		if os.execute("command -v zenity >/dev/null 2>&1") == 0 then
+			local file = io.popen("zenity --file-selection --save --filename=" .. M.baseDialogPath, "r")
+			for line in file:lines() do
+				path = line
+				break
+			end
+			file:close()
+			if path == "" then path = nil end
+		else -- Zenity failed, use a generic name in the application folder.
+			print("  Zenity failed, saving into application folder...")
+			local dir = sys.get_application_path() .. "/"
+			local filename = defaultFilename .. socket.gettime() .. "." .. fileExt
+			path = dir .. filename
+		end
+	end
+	return path
+end
+
+--########################################  Get Open Path  ########################################
+function M.get_open_path()
+	local code, path
+	if diags then
+		print("Using native extension dialogs...")
+		code, path = diags.open(nil, M.baseDialogPath)
+		if code ~= 1 then path = nil end
+	elseif sys.get_sys_info().system_name == "Linux" then -- Try using Zenity.
+		print("On Linux, trying Zenity...")
+		if os.execute("command -v zenity >/dev/null 2>&1") == 0 then
+			local file = io.popen("zenity --file-selection --filename=" .. M.baseDialogPath, "r")
+			for line in file:lines() do
+				path = line
+				break
+			end
+			file:close()
+			if path == "" then path = nil end
+		end
+	end
+	return path
+end
+
 
 
 return M
