@@ -152,11 +152,23 @@ function update_dragged_vert(self, index, pos)
 	check_poly_convex(self)
 end
 
+--########################################  Set Concave Vert  ########################################
+local function set_concave_vert(self, i, vert)
+	go.set(msg.url(nil, vert, "sprite"), "tint", concave_color)
+	table.insert(self.concave_verts, vert)
+end
+
+--########################################  Un-set Concave Vert  ########################################
+local function unset_concave_vert(self, vert)
+	go.set(msg.url(nil, vert, "sprite"), "tint", white)
+end
+
 --########################################  Check Poly Convex  ########################################
 function check_poly_convex(self)
 	-- Reset any previously concave verts
-	for i, v in ipairs(self.concave_verts) do
-		unset_concave_vert(self, i, v)
+	for i=#self.concave_verts, 1, -1 do
+		unset_concave_vert(self, self.concave_verts[i])
+		self.concave_verts[i] = nil
 	end
 
 	if #self.verts > 3 then
@@ -189,18 +201,6 @@ function check_poly_convex(self)
 			end
 		end
 	end
-end
-
---########################################  Set Concave Vert  ########################################
-function set_concave_vert(self, i, vert)
-	go.set(msg.url(nil, vert, "sprite"), "tint", concave_color)
-	self.concave_verts[i] = vert
-end
-
---########################################  Un-set Concave Vert  ########################################
-function unset_concave_vert(self, i, vert)
-	go.set(msg.url(nil, vert, "sprite"), "tint", white)
-	self.concave_verts[i] = nil
 end
 
 --########################################  Update  ########################################
@@ -307,10 +307,10 @@ function on_message(self, message_id, message, sender)
 		if code == 1 then
 			local openPath = fileman.get_path_dir(path)
 			local pointarray = fileman.open_polygon(path)
-			for i, v in ipairs(pointarray) do 
+			for i, v in ipairs(pointarray) do
 				add_point(self, v)
 			end
-		end		 
+		end
 	elseif message_id == hash("save polygon") then
 		if #self.verts >= 3 then
 			local code, path = diags.save(fileExt, savePath)
