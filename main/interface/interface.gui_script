@@ -5,6 +5,7 @@ local input = require "main.framework.input_globals"
 local fileman = require "main.file_manager"
 
 local messageNode
+local messageDuration = 5
 
 local initial_buttons = { "open btn", "clear btn", "save btn", "quit btn", "load overlay btn", "toggle overlay btn" }
 local main_buttons = { "clear btn", "save btn", "load overlay btn", "toggle overlay btn", "quit btn" }
@@ -60,7 +61,7 @@ local function display_message(text)
 	gui.cancel_animation(messageNode, "color")
 	gui.set_text(messageNode, text)
 	gui.set_color(messageNode, vmath.vector4(1))
-	gui.animate(messageNode, "color.w", 0, gui.EASING_INSINE, 1.5)
+	gui.animate(messageNode, "color.w", 0, gui.EASING_INSINE, messageDuration)
 end
 
 --########################################  On Message  ########################################
