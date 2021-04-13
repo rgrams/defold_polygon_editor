@@ -10,4 +10,4 @@ It's very, very simple and unpolished. Here is a short list of features:
 - Highlights convex (and therefore invalid) vertices in red.
 - Hold shift to snap vertices to 5-pixel increments.
 
-[alt text](https://github.com/rgrams/defold_polygon_editor/screenshot.png "Editor screenshot")
+!["Editor screenshot"](https://raw.githubusercontent.com/rgrams/defold_polygon_editor/master/screenshot.png)
