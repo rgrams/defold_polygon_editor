@@ -1,11 +1,11 @@
 script: "/main/interface/interface.gui_script"
 fonts {
-  name: "system_font"
-  font: "/builtins/fonts/system_font.font"
-}
-fonts {
   name: "opensans_reg"
   font: "/main/interface/opensans_reg.font"
+}
+textures {
+  name: "common"
+  texture: "/main/common/common.atlas"
 }
 background_color {
   x: 0.0
@@ -46,7 +46,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: ""
+  texture: "common/TEX_Square_64"
   id: "open btn"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
@@ -121,7 +121,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "open btn"
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 0.0
@@ -163,7 +163,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: ""
+  texture: "common/TEX_Square_64"
   id: "clear btn"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
@@ -238,7 +238,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "clear btn"
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 0.0
@@ -280,7 +280,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: ""
+  texture: "common/TEX_Square_64"
   id: "save btn"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
@@ -355,7 +355,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "save btn"
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 0.0
@@ -397,7 +397,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: ""
+  texture: "common/TEX_Square_64"
   id: "quit btn"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
@@ -472,7 +472,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "quit btn"
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 0.0
@@ -534,7 +534,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 0.35
   outline_alpha: 0.0
@@ -596,7 +596,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  layer: "default"
+  layer: "add-text"
   inherit_alpha: true
   alpha: 0.0
   outline_alpha: 0.0
@@ -638,7 +638,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: ""
+  texture: "common/TEX_Square_64"
   id: "load overlay btn"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
@@ -713,7 +713,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "load overlay btn"
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 0.0
@@ -755,7 +755,7 @@ nodes {
   }
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
-  texture: ""
+  texture: "common/TEX_Square_64"
   id: "toggle overlay btn"
   xanchor: XANCHOR_LEFT
   yanchor: YANCHOR_TOP
@@ -830,7 +830,7 @@ nodes {
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
   parent: "toggle overlay btn"
-  layer: "default"
+  layer: "text"
   inherit_alpha: true
   alpha: 1.0
   outline_alpha: 0.0
@@ -843,11 +843,11 @@ layers {
   name: "default"
 }
 layers {
-  name: "upper"
+  name: "text"
 }
 layers {
-  name: "top"
+  name: "add-text"
 }
 material: "/builtins/materials/gui.material"
-adjust_reference: ADJUST_REFERENCE_LEGACY
+adjust_reference: ADJUST_REFERENCE_PARENT
 max_nodes: 512

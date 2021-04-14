@@ -19,7 +19,7 @@ embedded_components {
   data: "tile_set: \"/main/common/common.atlas\"\n"
   "default_animation: \"TEX_Line_5x4px\"\n"
   "material: \"/builtins/materials/sprite.material\"\n"
-  "blend_mode: BLEND_MODE_ADD\n"
+  "blend_mode: BLEND_MODE_ALPHA\n"
   ""
   position {
     x: 2.0
