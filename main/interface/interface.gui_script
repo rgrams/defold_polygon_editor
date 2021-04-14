@@ -120,5 +120,12 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("display message") then
 		display_message(message.text)
+
+	elseif message_id == hash("open overlay image") then
+		local path = fileman.get_open_path()
+		if path then
+			fileman.baseDialogPath = fileman.get_path_dir(path)
+			msg.post("main#overlay", "load image", {image_path = path})
+		end
 	end
 end

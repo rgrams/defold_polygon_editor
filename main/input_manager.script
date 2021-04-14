@@ -17,6 +17,7 @@ local panning = false
 
 local cursor = "cursor/cursor#gui"
 local editor = "#editor"
+local interface = "#gui"
 
 
 --########################################  Init  ########################################
@@ -84,8 +85,14 @@ function on_input(self, action_id, action)
 			input.alt_pressed = true
 		elseif action_id == hash("shift") then
 			input.shift_pressed = true
-		elseif action_id == hash("s") and input.ctrl_pressed then
-			msg.post("#root", "save polygon")
+		elseif action_id == hash("save") and input.ctrl_pressed then
+			msg.post("#editor", "save polygon")
+		elseif action_id == hash("open") and input.ctrl_pressed then
+			if input.shift_pressed then
+				msg.post(interface, "open overlay image")
+			else
+				msg.post(editor, "open polygon")
+			end
 		elseif action_id == hash("mouse wheel up") then
 			campos.z = math.max(nearz + 1, campos.z * 0.90)
 			go.set_position(campos, "camera")

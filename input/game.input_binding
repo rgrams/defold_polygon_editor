@@ -40,7 +40,7 @@ key_trigger {
 }
 key_trigger {
   input: KEY_S
-  action: "s"
+  action: "save"
 }
 key_trigger {
   input: KEY_BACKSPACE
@@ -53,6 +53,10 @@ key_trigger {
 key_trigger {
   input: KEY_ENTER
   action: "enter"
+}
+key_trigger {
+  input: KEY_O
+  action: "open"
 }
 mouse_trigger {
   input: MOUSE_BUTTON_LEFT
