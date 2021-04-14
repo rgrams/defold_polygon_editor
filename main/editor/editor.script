@@ -311,7 +311,11 @@ function on_message(self, message_id, message, sender)
 			end
 		end
 	elseif message_id == hash("save polygon") then
-		if #self.verts >= 3 then
+		if #self.verts < 3 then
+			msg.post("#gui", "display message", {text = "Need at least 3 verts to make a polygon"})
+		elseif #self.verts > 16 then
+			msg.post("#gui", "display message", {text = "Polygons with more than 16 verts are not supported by Defold."})
+		else
 			local path = fileman.get_save_path()
 			if path then
 				path = fileman.ensure_file_extension(path)
@@ -320,8 +324,6 @@ function on_message(self, message_id, message, sender)
 				for i, v in ipairs(self.verts) do table.insert(pointarray, go.get_position(v)) end
 				fileman.save_polygon(path, unpack(pointarray))
 			end
-		else
-			msg.post("#gui", "display message", {text = "Need at least 3 verts to make a polygon"})
 		end
 	end
 end
