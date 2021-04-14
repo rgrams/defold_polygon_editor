@@ -8,6 +8,6 @@ It's very, very simple and unpolished. Here is a short list of features:
     - Uses [Def-Diags](https://github.com/andsve/def-diags/) for native file dialogs on Windows and Mac, and tries to use Zenity on Linux.
     - Can still save polygons in the application folder if none of those work.
 - Highlights convex (and therefore invalid) vertices in red.
-- Hold shift to snap vertices to 5-pixel increments.
+- Hold shift to snap vertices to an adjustable grid size.
 
 !["Editor screenshot"](https://raw.githubusercontent.com/rgrams/defold_polygon_editor/master/screenshot.png)
