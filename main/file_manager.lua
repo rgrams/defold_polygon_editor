@@ -8,6 +8,32 @@ local defaultFilename = "my_polygon"
 
 M.baseDialogPath = sys.get_application_path()
 
+-- https://stackoverflow.com/a/18197341/1266551
+local HTML5_DOWNLOAD_AS_FILE = [[
+function download_as_file(filename, text) {
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+}
+download_as_file("%s", "%s");
+]]
+
+--########################################  Sys Info Helper  ########################################
+
+local sys_info = sys.get_sys_info()
+
+local function is_html5()
+	return sys_info.system_name == "HTML5"
+end
+
+local function is_linux()
+	return sys_info.system_name == "Linux"
+end
+
 --########################################  Sort Verts Anticlockwise  ########################################
 local function sort_verts_anticlockwise(verts)
 	print("Sorting verts into counter-clockwise order . . . ")
@@ -97,9 +123,13 @@ function M.save_polygon(path, ...)
 	print("File Manager - saving file")
 	string = basestring
 	string_add_points(...)
-	io.output(path)
-	io.write(string)
-	io.output():close()
+	if is_html5() then
+		html5.run(HTML5_DOWNLOAD_AS_FILE:format(path, string:gsub("\n", "\\n")))
+	else
+		io.output(path)
+		io.write(string)
+		io.output():close()
+	end
 	msg.post("main#gui", "display message", {text = "Polygon Saved To:\n"..path})
 end
 
@@ -110,7 +140,7 @@ function M.get_save_path()
 		print("Using native extension dialogs...")
 		code, path = diags.save(nil, M.baseDialogPath)
 		if code ~= 1 then path = nil end
-	elseif sys.get_sys_info().system_name == "Linux" then -- Try using Zenity.
+	elseif is_linux() then -- Try using Zenity.
 		print("On Linux, trying Zenity...")
 		if os.execute("command -v zenity >/dev/null 2>&1") == 0 then
 			local file = io.popen("zenity --file-selection --save --filename=" .. M.baseDialogPath, "r")
@@ -126,6 +156,8 @@ function M.get_save_path()
 			local filename = defaultFilename .. socket.gettime() .. "." .. fileExt
 			path = dir .. filename
 		end
+	elseif is_html5() then
+		return defaultFilename .. socket.gettime() .. "." .. fileExt
 	end
 	return path
 end
@@ -137,7 +169,7 @@ function M.get_open_path()
 		print("Using native extension dialogs...")
 		code, path = diags.open(nil, M.baseDialogPath)
 		if code ~= 1 then path = nil end
-	elseif sys.get_sys_info().system_name == "Linux" then -- Try using Zenity.
+	elseif is_linux() then -- Try using Zenity.
 		print("On Linux, trying Zenity...")
 		if os.execute("command -v zenity >/dev/null 2>&1") == 0 then
 			local file = io.popen("zenity --file-selection --filename=" .. M.baseDialogPath, "r")
