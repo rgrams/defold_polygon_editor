@@ -10,7 +10,7 @@ local campos = vmath.vector3()
 
 local nearz = 5
 local farz = 2000
-local gridsize = 5
+Snap_Increment = 5 -- Global.
 local zoomstep = 100
 local zvect = vmath.vector3(0, 0, zoomstep)
 local panning = false
@@ -60,8 +60,8 @@ function update_mousepos(dx, dy)
 	end
 
 	if input.shift_pressed then
-		mouse_wpos.x = util.round(mouse_wpos.x / gridsize) * gridsize
-		mouse_wpos.y = util.round(mouse_wpos.y / gridsize) * gridsize
+		mouse_wpos.x = util.round(mouse_wpos.x / Snap_Increment) * Snap_Increment
+		mouse_wpos.y = util.round(mouse_wpos.y / Snap_Increment) * Snap_Increment
 		-- refigure screen pos from snapped world pos
 		mouse_spos = render_transform.world_to_screen(mouse_wpos)
 	end
