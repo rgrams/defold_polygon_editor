@@ -1,5 +1,7 @@
 # Defold Polygon Editor
 
+Web version available here: https://rossgrams.itch.io/defold-polygon-editor
+
 Since [it's possible to use convex polygon collision shapes with Defold](https://forum.defold.com/t/does-defold-support-only-three-shapes-for-collision-solved/1985), but the Editor doesn't yet support creating and editing them, I wrote a little program(with Defold) to fill that gap. So you no longer have to make a text file and write in vertex coordinates, in counter-clockwise order, by hand!
 
 It's very, very simple and unpolished. Here is a short list of features:

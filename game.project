@@ -23,3 +23,6 @@ game_binding = /input/game.input_bindingc
 [script]
 shared_state = 1
 
+[html5]
+cssfile = /builtins/manifests/web/dark_theme.css
+
