@@ -3,38 +3,58 @@ local util = require "main.framework.utilities"
 
 local node
 
+local function delete_texture(node)
+	local texture_id = gui.get_texture(node)
+	if texture_id and texture_id ~= hash("") then
+		gui.delete_texture(texture_id)
+	end
+end
+
+local function set_image_from_bytes(texture_id, bytes, node)
+	local img = image.load(bytes)
+	if not img then
+		return false
+	end
+	delete_texture(node)
+	local channels = #img.buffer / (img.width * img.height)
+	gui.new_texture(texture_id, img.width, img.height, string.sub("rgba", 1, channels), img.buffer)
+	gui.set_texture(node, texture_id)
+	gui.set_enabled(node, true)
+	return true
+end
+
+--########################################  Load and Set Image  ########################################
+local function load_and_set_image_from_path(path, node)
+	local t = socket.gettime()
+	local f = io.open(path, "rb")
+	local bytes = f:read("*a")
+	local success = set_image_from_bytes(path, bytes, node)
+	if not success then
+		print("ERROR: Failed to load: " .. path)
+	else
+		print("Image loaded in " .. (socket.gettime() - t) * 1000 .. "ms")
+	end
+	return success
+end
 
 --########################################  Init  ########################################
 function init(self)
 	node = gui.get_node("image")
 	gui.set_enabled(node, false)
-end
 
---########################################  Load and Set Image  ########################################
-local function load_and_set_image(path, node)
-	local success = true
-
-	local t = socket.gettime()
-	local f = io.open(path, "rb")
-	local bytes = f:read("*a")
-	local img = image.load(bytes)
-	if img then
-		local channels = #img.buffer / (img.width * img.height)
-		gui.new_texture(path, img.width, img.height, string.sub("rgba", 1, channels), img.buffer)
-		gui.set_texture(node, path)
-		gui.set_enabled(node, true)
-		print("Image loaded in " .. (socket.gettime() - t) * 1000 .. "ms")
-	else
-		print("ERROR: Failed to load: " .. path)
-		success = false
+	if filedrop then
+		filedrop.set_listener(function(self, event, filename, data)
+			if event == "drop" then
+				set_image_from_bytes(filename, data, node)
+			end
+		end)
 	end
-	return success
 end
 
 --########################################  On Message  ########################################
 function on_message(self, message_id, message, sender)
 	if message_id == hash("load image") then
-		local loaded = load_and_set_image(message.image_path, node)
+		local loaded = load_and_set_image_from_path(message.image_path, node)
 		if not loaded then msg.post("#gui", "display message", {text = "Failed to load image"}) end
 
 	elseif message_id == hash("toggle") then

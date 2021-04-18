@@ -2,7 +2,7 @@
 title = Defold Polygon Editor
 version = 0.4.0
 write_log = 0
-dependencies = https://github.com/andsve/def-diags/archive/master.zip
+dependencies = https://github.com/andsve/def-diags/archive/master.zip,https://github.com/britzl/extension-filedrop/archive/refs/tags/1.0.0.zip
 
 [bootstrap]
 main_collection = /main/root.collectionc
