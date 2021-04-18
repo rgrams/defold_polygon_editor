@@ -13,6 +13,18 @@ local btn_node_names = {
 	"snap + btn", "snap - btn",
 	"quit btn",
 }
+local html_exclude_btn_names = {
+	["open btn"] = true,
+	["load overlay btn"] = true,
+	["quit btn"] = true,
+}
+local html_btn_node_names = {}
+for i,name in ipairs(btn_node_names) do
+	if not html_exclude_btn_names[name] then
+		table.insert(html_btn_node_names, name)
+	end
+end
+
 local active_buttons = {}
 local cur_hover_btn = nil
 
@@ -59,14 +71,27 @@ function init(self)
 	gui.set_render_order(1)
 
 	self.myurl = msg.url()
-	gui.set_text(gui.get_node("controls text"), "ctrl-click: add point -- left-click drag: move point -- alt-click: delete point\nshift: snap to grid -- mouse wheel: zoom -- middle mouse drag: pan" )
+	local controls_text = "ctrl-click: add point -- left-click drag: move point -- alt-click: delete point\nshift: snap to grid -- mouse wheel: zoom -- middle mouse drag: pan"
 
-	for i, name in ipairs(btn_node_names) do
+	local btn_names = btn_node_names
+
+	-- remove buttons that should not be available in HTML5
+	if sys.get_sys_info().system_name == "HTML5" then
+		btn_names = html_btn_node_names
+		for name,_ in pairs(html_exclude_btn_names) do
+			gui.delete_node(gui.get_node(name))
+		end
+		controls_text = controls_text .. "\ndrag'n'drop: set .png or .jpg overlay image"
+	end
+
+	-- set up buttons
+	for i, name in ipairs(btn_names) do
 		local button = ui.newbutton(name, gui.get_node(name), self.myurl, btns)
 		button:set_active(true)
 		button.releasefunc = btn_funcs[name]
 	end
 
+	gui.set_text(gui.get_node("controls text"), controls_text )
 	messageNode = gui.get_node("message text")
 end
 
