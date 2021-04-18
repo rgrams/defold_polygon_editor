@@ -1014,7 +1014,7 @@ nodes {
 nodes {
   position {
     x: 500.0
-    y: 430.918
+    y: 443.918
     z: 0.0
     w: 1.0
   }
@@ -1049,7 +1049,7 @@ nodes {
   id: "controls text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_TOP
-  pivot: PIVOT_CENTER
+  pivot: PIVOT_N
   outline {
     x: 1.0
     y: 1.0
