@@ -5,7 +5,7 @@ instances {
   position {
     x: 0.0
     y: 0.0
-    z: 1000.0
+    z: 0.0
   }
   rotation {
     x: 0.0
@@ -141,6 +141,7 @@ embedded_instances {
   "  id: \"vertfact\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/main/polygon pieces/vertex.go\\\"\\n"
+  "load_dynamically: false\\n"
   "\"\n"
   "  position {\n"
   "    x: 0.0\n"
@@ -158,6 +159,7 @@ embedded_instances {
   "  id: \"segfact\"\n"
   "  type: \"factory\"\n"
   "  data: \"prototype: \\\"/main/polygon pieces/segment.go\\\"\\n"
+  "load_dynamically: false\\n"
   "\"\n"
   "  position {\n"
   "    x: 0.0\n"

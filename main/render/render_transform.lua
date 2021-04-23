@@ -12,30 +12,9 @@ M.window_halfres = vmath.vector3()
 
 M.zoom = 1
 
-local nearz = 100
-local farz = 1000
-local abs_nearz = nearz -- absolute nearz and farz
-local abs_farz = farz -- regular nearz and farz are relative to camera z
+local nearz = -1
+local farz = 1
 local world_plane_z = 0
-local camz = 1000
-
-
---########################################  Set Camera  ########################################
-function M.set_camera(zpos, near, far) -- near & far args are optional
-	nearz = near or nearz
-	farz = far or farz
-
-	camz = zpos
-	abs_nearz = camz - nearz
-	abs_farz = camz - farz
-
-	M.update_zoom()
-end
-
---########################################  Update Zoom  ########################################
-function M.update_zoom()
-	M.zoom = vmath.length(M.screen_to_world(0, 0) - M.screen_to_world(0, 1))
-end
 
 --########################################  Set Window Resolution  ########################################
 function M.set_window_res(x, y)
@@ -56,7 +35,7 @@ function M.screen_to_world(x, y)
 	np = np * (1/np.w)
 	fp = fp * (1/fp.w)
 
-	local t = (world_plane_z - abs_nearz) / (abs_farz - abs_nearz)
+	local t = (world_plane_z - nearz) / (farz - nearz)
 	local worldpos = vmath.lerp(t, np, fp)
 	return vmath.vector3(worldpos.x, worldpos.y, worldpos.z)
 end

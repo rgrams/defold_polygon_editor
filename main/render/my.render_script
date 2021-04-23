@@ -1,13 +1,24 @@
-local render_transform = require "main.render_transform"
 
--- 			A pretty standard render script, but added code to send camera
--- 		view and projection matrices to the transform module every frame. (on message)
+local render_transform = require "main.render.render_transform"
+
+local IDENTITY_MATRIX = vmath.matrix4()
+
+-- Projection that centers content with maintained aspect ratio and optional zoom.
+local function fixed_projection(near, far, zoom)
+	local width = render.get_window_width() * zoom
+	local height = render.get_window_height() * zoom
+	local xoffset, yoffset = -width/2, -height/2
+	return vmath.matrix4_orthographic(xoffset, xoffset + width, yoffset, yoffset + height, near, far)
+end
+
+local function get_projection(self)
+	return self.projection_fn(self.near, self.far, render_transform.zoom)
+end
 
 function init(self)
 	self.tile_pred = render.predicate({"tile"})
 	self.gui_pred = render.predicate({"gui"})
 	self.text_pred = render.predicate({"text"})
-	self.model_pred = render.predicate({"model"})
 	self.particle_pred = render.predicate({"particle"})
 
 	self.clear_color = vmath.vector4(0, 0, 0, 0)
@@ -17,19 +28,37 @@ function init(self)
 	self.clear_color.w = sys.get_config("render.clear_color_alpha", 0)
 
 	self.view = vmath.matrix4()
-	self.projection = vmath.matrix4()
+
+	self.near = -1
+	self.far = 1
+	self.projection_fn = fixed_projection
+	self.projection = get_projection(self)
+
+	self.clear_buffers = {
+	  [render.BUFFER_COLOR_BIT] = self.clear_color,
+	  [render.BUFFER_DEPTH_BIT] = 1,
+	  [render.BUFFER_STENCIL_BIT] = 0
+	}
 
 	render_transform.window_res = vmath.vector3(render.get_window_width(), render.get_window_height(), 0)
 	render_transform.window_halfres = render_transform.window_res * 0.5
+	render_transform.view = self.view
+	render_transform.proj = self.projection
 end
 
 function update(self)
 	render.set_depth_mask(true)
-	render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
+	render.set_stencil_mask(0xff)
+	render.clear(self.clear_buffers)
 
 	render.set_viewport(0, 0, render.get_window_width(), render.get_window_height())
+
+   self.projection = get_projection(self)
+   render_transform.proj = self.projection
+
+	-- Render world.
 	render.set_view(self.view)
-	render.set_projection(self.projection)
+   render.set_projection(self.projection)
 
 	render.set_depth_mask(false)
 	render.disable_state(render.STATE_DEPTH_TEST)
@@ -38,41 +67,28 @@ function update(self)
 	render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
 	render.disable_state(render.STATE_CULL_FACE)
 
-	render.set_projection(self.projection)
-
 	render.draw(self.tile_pred)
 	render.draw(self.particle_pred)
-
-	render.enable_state(render.STATE_CULL_FACE)
-	render.enable_state(render.STATE_DEPTH_TEST)
-	render.set_depth_mask(true)
-	render.draw(self.model_pred)
 	render.draw_debug3d()
 
-	render.set_view(vmath.matrix4())
+	-- Render GUI.
+	render.set_view(IDENTITY_MATRIX)
 	render.set_projection(vmath.matrix4_orthographic(0, render.get_window_width(), 0, render.get_window_height(), -1, 1))
 
-	render.disable_state(render.STATE_CULL_FACE)
-	render.disable_state(render.STATE_DEPTH_TEST)
 	render.enable_state(render.STATE_STENCIL_TEST)
 	render.draw(self.gui_pred)
 	render.draw(self.text_pred)
 	render.disable_state(render.STATE_STENCIL_TEST)
-
-	render.set_depth_mask(false)
-	render.draw_debug3d()
 end
-
-local firstframe = true
 
 function on_message(self, message_id, message)
 	if message_id == hash("clear_color") then
 		self.clear_color = message.color
+		self.clear_buffers[render.BUFFER_COLOR_BIT] = self.clear_color
 	elseif message_id == hash("set_view_projection") then
 		self.view = message.view
-		self.projection = message.projection
 		render_transform.view = message.view
-		render_transform.proj = message.projection
-		if firstframe then render_transform.update_zoom() firstframe = false end
+	elseif message_id == hash("window_resized") then
+		render_transform.set_window_res(message.width, message.height)
 	end
 end

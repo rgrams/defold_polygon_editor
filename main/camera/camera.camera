@@ -1,5 +1,0 @@
-aspect_ratio: 1.0
-fov: 0.785
-near_z: 100.0
-far_z: 2000.0
-auto_aspect_ratio: 1
